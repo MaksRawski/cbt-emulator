@@ -1,3 +1,3 @@
-# cbt emulator
+# CBT emulator
 
-CBT emulator written in rust.
+[CBT](https://gitlab.com/MaksRawski/cbt/) emulator written in rust.
