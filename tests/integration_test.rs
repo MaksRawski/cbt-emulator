@@ -1,15 +1,15 @@
-use cbt_emulator;
-use cbt_emulator::DataBus;
-use std::num::Wrapping;
-
 mod test_alu {
-    use super::*;
+    pub use cbt_emulator;
+    pub use cbt_emulator::alu::Alu;
+    pub use cbt_emulator::bus::DataBus;
+    pub use cbt_emulator::reg::Register;
+    use std::num::Wrapping;
 
     // TODO: somehow get rid of this repetetive declaration of variables
     #[test]
     fn not() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut b = Register::new();
 
         b.set(1);
         assert_eq!(alu.not(&b), Wrapping(254));
@@ -17,9 +17,9 @@ mod test_alu {
 
     #[test]
     fn nor() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(15);
         b.set(240);
@@ -27,9 +27,9 @@ mod test_alu {
     }
     #[test]
     fn nand() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(14);
         b.set(28);
@@ -37,9 +37,9 @@ mod test_alu {
     }
     #[test]
     fn xor() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(14);
         b.set(28);
@@ -47,9 +47,9 @@ mod test_alu {
     }
     #[test]
     fn xnor() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(14);
         b.set(28);
@@ -57,9 +57,9 @@ mod test_alu {
     }
     #[test]
     fn and() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(14);
         b.set(28);
@@ -67,9 +67,9 @@ mod test_alu {
     }
     #[test]
     fn or() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(14);
         b.set(28);
@@ -78,9 +78,9 @@ mod test_alu {
 
     #[test]
     fn add() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(127);
         b.set(127);
@@ -93,9 +93,9 @@ mod test_alu {
     }
     #[test]
     fn adc() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         alu.set_flag('c', true);
         a.set(63);
@@ -109,9 +109,9 @@ mod test_alu {
     }
     #[test]
     fn sub() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(128);
         b.set(128);
@@ -125,9 +125,9 @@ mod test_alu {
     }
     #[test]
     fn sbc() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         alu.set_flag('c', false);
         a.set(128);
@@ -141,9 +141,9 @@ mod test_alu {
     }
     #[test]
     fn cmp() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut a = cbt_emulator::Register::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut a = Register::new();
+        let mut b = Register::new();
 
         a.set(128);
         b.set(128);
@@ -156,8 +156,8 @@ mod test_alu {
     }
     #[test]
     fn inc() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut b = Register::new();
 
         b.set(255);
 
@@ -169,8 +169,8 @@ mod test_alu {
     }
     #[test]
     fn dec() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut b = Register::new();
 
         b.set(0);
 
@@ -182,8 +182,8 @@ mod test_alu {
     }
     #[test]
     fn shl() {
-        let mut alu = cbt_emulator::Alu::new();
-        let mut b = cbt_emulator::Register::new();
+        let mut alu = Alu::new();
+        let mut b = Register::new();
 
         b.set(128);
 
