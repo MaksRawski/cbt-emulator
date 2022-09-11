@@ -1,70 +1,37 @@
-pub mod alu;
-pub mod bus;
-pub mod memory;
-pub mod pc;
-pub mod reg;
+//! # Finally you can play around with CBT on your own!
+//!
+//! This emulator takes real microcode
+//! straight from [CBT's generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
+//! and translates control word which that
+//! microcode would set into activating appropriate
+//! modules with correct actions.
 
-use alu::*;
-use memory::*;
-use pc::*;
-use reg::*;
+// pub mod alu;
+// pub mod bus;
+// pub mod clock;
+// pub mod cpu;
+// pub mod lcd;
+// pub mod memory;
+// pub mod microcode;
+// pub mod pc;
+// pub mod reg;
 
-/// Goal of this library is to emulate only
-/// results of instructions but doing so
-/// while keeping track of how many clock cycles
-/// each instruction consumes on real hardware
+use wasm_bindgen::prelude::*;
 
-pub struct Cpu {
-    pub clk: Clock,
-    pub ram: Ram,
-    pub rom: Rom,
-    pub mar: [Register; 2],
-    pub pc: ProgramCounter,
-    pub sp: Register,
-    pub registers: [Register; 4],
-    pub alu: Alu,
-    pub decoder: Microcode,
+// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
+// allocator.
+// #[cfg(feature = "wee_alloc")]
+// #[global_allocator]
+// static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+use std::panic;
+
+#[wasm_bindgen]
+pub fn setup_logging() {
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
 }
 
-impl Cpu {
-    pub fn new() -> Self {
-        Self {
-            clk: Clock::new(),
-            ram: Ram::new(),
-            rom: Rom::new(),
-            mar: [Register::new(), Register::new()],
-            pc: ProgramCounter::new(),
-            sp: Register::new(),
-            registers: [
-                Register::new(),
-                Register::new(),
-                Register::new(),
-                Register::new(),
-            ],
-            alu: Alu::new(),
-            decoder: Microcode::new(),
-        }
-    }
-    pub fn rst() {}
-}
-
-pub struct Clock {
-    pub state: bool,
-}
-
-impl Clock {
-    pub fn new() -> Self {
-        Self { state: false }
-    }
-    pub fn tick(&mut self) {
-        self.state = !self.state;
-    }
-}
-
-// decoding logic
-pub struct Microcode {}
-impl Microcode {
-    pub fn new() -> Self {
-        Self {}
-    }
+#[wasm_bindgen]
+pub fn add(a: u8, b: u8) -> u8 {
+    a + b
 }

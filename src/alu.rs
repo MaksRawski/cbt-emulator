@@ -1,46 +1,55 @@
-pub use crate::bus::DataBus;
+//! Arithmetic logic unit.
+use crate::bus::DataBus;
 use crate::reg::Register;
+use serde::{Deserialize, Serialize};
 
-use std::collections::HashMap;
+// #[cfg(test)]
+// use quickcheck::{Arbitrary, Gen};
 use std::num::Wrapping;
+use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 pub struct Alu {
     // only contains flags as its internal state
-    pub flags: HashMap<char, bool>,
+    flags: [bool; 4],
 }
 
 impl Alu {
     pub fn new() -> Self {
-        let mut flags = HashMap::new();
-        flags.insert('c', false);
-        flags.insert('n', false);
-        flags.insert('o', false);
-        flags.insert('z', false);
+        let flags = [false; 4];
         Self { flags }
     }
 
+    fn get_index(&self, flag: char) -> usize {
+        match flag {
+            'c' => 0,
+            'n' => 1,
+            'o' => 2,
+            'z' => 3,
+            _ => panic!("Tried to use non existent flag"),
+        }
+    }
+
+    /// # Panics
+    /// When trying to use non existent flag.
     pub fn set_flag(&mut self, flag: char, value: bool) {
         // 3     2          1        0
         // c     n          o        z
         // carry negtive    overflow zero
-        if self.flags.contains_key(&flag) {
-            self.flags.insert(flag, value).unwrap();
-        } else {
-            panic!("{} is not a valid flag.", flag);
-        }
+        self.flags[self.get_index(flag)] = value;
     }
 
+    /// # Panics
+    /// When trying to use non existent flag.
     pub fn get_flag(&self, flag: char) -> bool {
-        match self.flags.get(&flag) {
-            Some(s) => *s,
-            None => panic!("{} is not a valid flag.", flag),
-        }
+        self.flags[self.get_index(flag)]
     }
 }
 
+/// argument A needs to get &Register A
+/// argument B is the chosen &Register
 impl Alu {
-    /// argument A needs to get &Register A
-    /// argument B is the chosen &Register
     pub fn not(&mut self, b: &Register) -> Wrapping<u8> {
         !b.get()
     }
@@ -71,9 +80,9 @@ impl Alu {
         // that happens when msb of a and msb of b are the same
         // but msb of result is diffrent
         let mut overflow = false;
-        let msb_a = a.get().0 & 1 << 7;
-        let msb_b = b.get().0 & 1 << 7;
-        if (msb_a == msb_b) && ((msb_a & msb_b) != sum.0 & 1 << 7) {
+        let msb_a = a.get().0 >> 7;
+        let msb_b = b.get().0 >> 7;
+        if (msb_a == msb_b) && ((msb_a & msb_b) != sum.0 >> 7) {
             overflow = true;
         }
 
@@ -93,7 +102,7 @@ impl Alu {
         // but msb of result is diffrent
         let mut overflow = false;
         let msb_a = a.get().0 + self.get_flag('c') as u8 & 1 << 7;
-        let msb_b = b.get().0 & 1 << 7;
+        let msb_b = b.get().0 >> 7;
         if (msb_a == msb_b) && ((msb_a & msb_b) != sum.0 & 1 << 7) {
             overflow = true;
         }
@@ -113,8 +122,8 @@ impl Alu {
         // that happens when inverse of msb of a and msb of b are diffrent
         // but msb of result is diffrent than `or` of them
         let mut overflow = false;
-        let msb_a = !a.get().0 & 1 << 7;
-        let msb_b = b.get().0 & 1 << 7;
+        let msb_a = !a.get().0 >> 7;
+        let msb_b = b.get().0 >> 7;
         if (msb_a != msb_b) && ((msb_a | msb_b) != diffrence.0 & 1 << 7) {
             overflow = true;
         }
@@ -229,3 +238,10 @@ impl Alu {
         Wrapping(sum)
     }
 }
+
+// #[cfg(test)]
+// impl Arbitrary for Alu {
+//     fn arbitrary<G: Gen>(g: &mut G) -> Alu {
+//         Alu { flags: [false; 4] }.set()
+//     }
+// }

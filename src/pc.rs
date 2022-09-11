@@ -1,6 +1,10 @@
+//! Program counter.
+
 pub use crate::bus::AddressBus;
+use serde::{Deserialize, Serialize};
 use std::num::Wrapping;
 
+#[derive(Deserialize, Serialize, Copy, Clone, Debug)]
 pub struct ProgramCounter {
     value: Wrapping<u16>,
 }

@@ -1,9 +1,17 @@
+pub use cbt_emulator;
+pub use cbt_emulator::alu::Alu;
+pub use cbt_emulator::bus::DataBus;
+pub use cbt_emulator::lcd::Lcd;
+pub use cbt_emulator::reg::Register;
+// extern crate quickcheck;
+// extern crate quickcheck_macros;
+
+// use quickcheck::quickcheck;
+// #[macro_use(quickcheck)]
+use std::num::Wrapping;
+
 mod test_alu {
-    pub use cbt_emulator;
-    pub use cbt_emulator::alu::Alu;
-    pub use cbt_emulator::bus::DataBus;
-    pub use cbt_emulator::reg::Register;
-    use std::num::Wrapping;
+    use super::*;
 
     // TODO: somehow get rid of this repetetive declaration of variables
     #[test]
@@ -192,5 +200,71 @@ mod test_alu {
         assert_eq!(alu.get_flag('n'), false);
         assert_eq!(alu.get_flag('o'), true);
         assert_eq!(alu.get_flag('z'), true);
+    }
+}
+
+mod test_lcd {
+    use super::*;
+
+    #[test]
+    fn buffer() {
+        let mut lcd = Lcd::new();
+        lcd.txt(67);
+        lcd.txt(66);
+        lcd.txt(84);
+        let mut chars = lcd.display.buffer[0].chars();
+        assert_eq!(chars.next(), Some('C'));
+        assert_eq!(chars.next(), Some('B'));
+        assert_eq!(chars.next(), Some('T'));
+    }
+    #[test]
+    fn cursor_auto_increment() {
+        let mut lcd = Lcd::new();
+        lcd.txt(67);
+        lcd.txt(66);
+        lcd.txt(84);
+        assert_eq!(lcd.cursor.get_row(), 0);
+        assert_eq!(lcd.cursor.get_column(), 3);
+        lcd.cmd(0xc0);
+        assert_eq!(lcd.cursor.get_row(), 1);
+        assert_eq!(lcd.cursor.get_column(), 0);
+    }
+    #[test]
+    fn cursor_manual_increment() {
+        let mut lcd = Lcd::new();
+        for _ in 0..40 {
+            lcd.cmd(6);
+        }
+        assert_eq!(lcd.cursor.get_row(), 1);
+        assert_eq!(lcd.cursor.get_column(), 0);
+        lcd.cmd(4);
+        assert_eq!(lcd.cursor.get_row(), 0);
+        assert_eq!(lcd.cursor.get_column(), 39);
+        lcd.cmd(0xc0);
+        assert_eq!(lcd.cursor.get_row(), 1);
+        assert_eq!(lcd.cursor.get_column(), 0);
+    }
+    #[test]
+    fn shifts() {
+        let mut lcd = Lcd::new();
+        lcd.txt(65);
+
+        lcd.cmd(0x1c);
+        let mut chars = lcd.display.buffer[0].chars();
+        assert_eq!(chars.next(), Some('\0'));
+        assert_eq!(chars.next(), Some('A'));
+
+        lcd.cmd(0x18);
+        let mut chars = lcd.display.buffer[0].chars();
+        assert_eq!(chars.next(), Some('A'));
+    }
+}
+mod test_memory {
+    use super::*;
+
+    #[test]
+    fn get_from_ram() {
+        let mut ram = Ram::new();
+        let mut rom = Rom::new();
     }
 }
