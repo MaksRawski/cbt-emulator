@@ -1,0 +1,50 @@
+@import './vars';
+@import './inputs';
+
+.App {
+  background-color: $bg;
+  min-height: 100vh;
+  min-width: 100vw;
+  color: $font;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.App-header {
+  padding: 20px;
+  font-size: calc(10px + 2vmin);
+
+}
+
+.Modules{
+  display: flex;
+  flex-flow: row;
+  justify-content: space-evenly;
+  margin: 10px;
+  height: 80vh;
+  text-align: center;
+}
+
+.Left-side , .Right-side{
+  display: flex;
+  flex-flow: column;
+  justify-content: space-around;
+}
+
+.Left-side > *, .Right-side > *{
+  /* height: 100%; */
+}
+
+.row{
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+}
+
+.LED{
+  font-size: 2em;
+  margin: 0;
+  padding: 0;
+  color: $font;
+}
