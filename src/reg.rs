@@ -1,7 +1,6 @@
 //! 8 Bit Register.
-pub use crate::bus::DataBus;
+pub use crate::bus::Bus;
 use serde::{Deserialize, Serialize};
-use std::num::Wrapping;
 use wasm_bindgen::prelude::*;
 
 // #[cfg(test)]
@@ -9,22 +8,21 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub struct Register {
-    value: Wrapping<u8>,
-}
+pub struct Register(pub u8);
 
 impl Register {
     pub fn new() -> Register {
-        Register { value: Wrapping(0) }
+        Register(0)
     }
-}
-
-impl DataBus for Register {
-    fn get(&self) -> Wrapping<u8> {
-        self.value
+    // there will be only one output at a time
+    // so they MUST be sync
+    pub fn o(&self) -> u8 {
+        self.0
     }
-    fn set(&mut self, new_value: u8) {
-        self.value = Wrapping(new_value);
+    // there can be many inputs (each to a different module)
+    // therefore it's safe for them to be async, run concurrently
+    pub fn i(&mut self, v: u8) {
+        self.0 = v;
     }
 }
 

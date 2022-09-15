@@ -2,19 +2,18 @@
 //!
 //! This emulator takes real microcode
 //! straight from [CBT's generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
-//! and translates control word which that
-//! microcode would set into activating appropriate
-//! modules with correct actions.
+//! But runs functions instead of activating modules.
 
-// pub mod alu;
-// pub mod bus;
-// pub mod clock;
-// pub mod cpu;
+pub mod alu;
+pub mod bus;
+pub mod cpu;
 // pub mod lcd;
-// pub mod memory;
-// pub mod microcode;
-// pub mod pc;
-// pub mod reg;
+#[allow(dead_code)]
+pub mod cw;
+pub mod memory;
+pub mod microcode;
+pub mod pc;
+pub mod reg;
 
 use wasm_bindgen::prelude::*;
 
