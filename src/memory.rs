@@ -11,7 +11,6 @@
 pub const RAM_SIZE: u16 = 32768;
 pub const ROM_SIZE: u16 = 32768;
 
-// #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Memory {
     ram: Ram,
     rom: Rom,
@@ -51,9 +50,12 @@ impl Memory {
     pub fn hai(&mut self, a: u8) {
         self.address = (a as u16) << 8 | (self.address & 0b1111_1111);
     }
+    pub fn view_rom(&self) -> &Vec<u8> {
+        &self.rom.0
+    }
 }
 
-pub struct Ram(pub Vec<u8>);
+pub struct Ram(Vec<u8>);
 
 pub struct Rom(Vec<u8>);
 

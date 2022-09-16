@@ -1,3 +1,7 @@
+use wasm_bindgen::prelude::wasm_bindgen;
+
+#[wasm_bindgen]
+#[derive(Clone, Copy)]
 pub struct Bus(pub u8);
 
 // impl BUS {

@@ -1,40 +1,32 @@
 //! Emulates HD74480 lcd 16x2 variant.
-//! Even though it's 16x2 it still needs a 40x2 buffer.
-
-use serde::{Deserialize, Serialize};
 
 pub use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(a: &str);
-}
+// #[wasm_bindgen]
+// extern "C" {
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(a: &str);
+// }
 
-macro_rules! console_log {
-     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
+// macro_rules! console_log {
+//      ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+// }
 
-// #[macro_use]
 #[wasm_bindgen]
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Lcd {
-    #[wasm_bindgen(skip)]
-    // pub is set only for testing
-    pub display: Display,
-    #[wasm_bindgen(skip)]
-    pub cursor: Cursor,
+    display: Display,
+    cursor: Cursor,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Display {
-    // pub is set only for testing
-    pub buffer: Vec<String>,
+    pub buffer: [u8; 40],
     two_line_mode: bool,
     on: bool,
 }
 
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Cursor {
     row: u8,
     column: u8,
@@ -61,11 +53,8 @@ impl Cursor {
     pub fn hide(&mut self) {
         self.visible = false;
     }
-    pub fn get_row(&self) -> usize {
-        self.row as usize
-    }
-    pub fn get_column(&self) -> usize {
-        self.column as usize
+    pub fn location(&self) -> usize {
+        self.row as usize * 40 + self.column as usize
     }
     pub fn increment(&mut self) {
         if self.column == 39 {
@@ -101,34 +90,37 @@ impl Cursor {
 impl Display {
     pub fn new() -> Self {
         Self {
-            buffer: vec![String::from("0".repeat(40)); 2],
+            buffer: [0; 40],
             on: false,
             two_line_mode: false,
         }
     }
     pub fn clear(&mut self) {
-        self.buffer = vec![String::from("0".repeat(40)); 2];
+        self.buffer = [0; 40];
     }
-    pub fn add(&mut self, at: &mut Cursor, charcode: u8) {
-        self.buffer[at.get_row()].insert(at.get_column(), charcode as char);
-        self.buffer[at.get_row()].pop();
+    pub fn add(&mut self, cur: &mut Cursor, charcode: u8) {
+        self.buffer[cur.location()] = charcode;
 
         // send this code to display
         // and js will decide which character
         // corresponds to that code
-        at.increment();
+        cur.increment();
     }
     pub fn shift_right(&mut self) {
-        for i in 0..self.buffer.len() {
-            self.buffer[i].insert(0, '\0');
-            self.buffer[i].pop();
+        let mut new_buffer = [0u8; 40];
+        new_buffer[0] = 0;
+        for i in 1..40 {
+            new_buffer[i] = self.buffer[i - 1];
         }
+        self.buffer = new_buffer;
     }
     pub fn shift_left(&mut self) {
-        for i in 0..self.buffer.len() {
-            self.buffer[i].remove(0);
-            self.buffer[i].insert(39, '\0');
+        let mut new_buffer = [0u8; 40];
+        for i in 0..39 {
+            new_buffer[i] = self.buffer[i + 1];
         }
+        new_buffer[39] = 0;
+        self.buffer = new_buffer;
     }
 
     // keep buffer but turn off screen
@@ -149,7 +141,6 @@ impl Display {
     }
 }
 
-#[wasm_bindgen]
 impl Lcd {
     pub fn new() -> Self {
         let display = Display::new();
@@ -188,7 +179,14 @@ impl Lcd {
             0x38 => self.display.two_line_mode(),
             0x80 => self.cursor.return_home(),
             0xc0 => self.cursor.second_row(),
-            _ => console_log!("Invalid command."),
+            _ => {}
         }
+    }
+}
+
+#[wasm_bindgen]
+impl Lcd {
+    pub fn content(&self) -> Vec<u8> {
+        Vec::from(self.display.buffer)
     }
 }

@@ -1,45 +1,24 @@
+use wasm_bindgen::prelude::wasm_bindgen;
+
 use crate::alu::ALU;
 use crate::bus::Bus;
+use crate::clock::Clock;
 use crate::cw::*;
 
+use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
 use crate::pc::ProgramCounter;
 use crate::reg::Register;
 
-pub struct Clock {
-    pub utime: u8,
-    pub halted: bool,
-}
-
-impl Clock {
-    pub fn new() -> Self {
-        Self {
-            utime: 0,
-            halted: false,
-        }
-    }
-    /// utime will overflow if it reaches 16
-    /// setting SR bit is preffered way of resetting it
-    pub fn tick(&mut self) {
-        self.utime += 1;
-        self.utime &= 0b1111;
-    }
-    pub fn rst(&mut self) {
-        self.utime = 0;
-    }
-    pub fn hlt(&mut self) {
-        self.halted = true;
-    }
-}
-
+#[wasm_bindgen]
 pub struct Cpu {
     pub bus: Bus,
-    clock: Clock,
-    ucode: Microcode,
+    pub clock: Clock,
+    pub pc: ProgramCounter,
+    pub ir: Register,
     mem: Memory,
-    ir: Register,
-    pc: ProgramCounter,
+    ucode: Microcode,
 
     ra: Register,
     rb: Register,
@@ -47,9 +26,10 @@ pub struct Cpu {
     rd: Register,
     sp: Register,
     alu: ALU,
-    //     lcd: Lcd,
+    pub lcd: Lcd,
 }
 
+#[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Self {
         Self {
@@ -67,6 +47,7 @@ impl Cpu {
             sp: Register::new(),
 
             alu: ALU::new(),
+            lcd: Lcd::new(),
         }
     }
     pub fn load_program(&mut self, prg: Vec<u8>) {
@@ -76,7 +57,7 @@ impl Cpu {
     fn cycle(&mut self) {
         let cw =
             self.ucode
-                .instruction_to_cw(self.ir.0, self.alu.flags.to_byte(), self.clock.utime);
+                .instruction_to_cw(&self.ir.0, &self.alu.flags.to_byte(), &self.clock.utime);
 
         let bus = match cw {
             cw if (cw & AO > 0) => self.ra.o(),
@@ -115,11 +96,19 @@ impl Cpu {
                 _ => {}
             }
         }
+        if (cw & LCE | LCM) > 0 {
+            self.lcd.cmd(bus);
+        } else if (cw & LCE) > 0 {
+            self.lcd.txt(bus);
+        }
         self.bus.0 = bus;
     }
     pub fn tick(&mut self) {
-        self.clock.tick();
         self.cycle();
+        self.clock.tick();
+    }
+    pub fn view_rom(&self) -> Vec<u8> {
+        self.mem.view_rom().to_vec()
     }
 }
 
@@ -128,13 +117,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_fetching() {
+    fn test_lcd() {
         let mut cpu = Cpu::new();
-        cpu.cycle();
-        cpu.clock.tick();
-        // first cycle is always LPO | LAI
-        // therefore after that cycle we should have
-        // lower 8 bits of program counter in mem address register
-        // assert_eq!(cpu.mem.address, )
+        cpu.load_program(vec![42]);
+        assert_eq!(cpu.view_rom(), vec![42]);
     }
 }

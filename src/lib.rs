@@ -6,10 +6,11 @@
 
 pub mod alu;
 pub mod bus;
+pub mod clock;
 pub mod cpu;
-// pub mod lcd;
 #[allow(dead_code)]
 pub mod cw;
+pub mod lcd;
 pub mod memory;
 pub mod microcode;
 pub mod pc;
@@ -31,6 +32,6 @@ pub fn setup_logging() {
 }
 
 #[wasm_bindgen]
-pub fn add(a: u8, b: u8) -> u8 {
+pub fn my_add(a: u8, b: u8) -> u8 {
     a + b
 }

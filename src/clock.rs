@@ -1,26 +1,32 @@
-//! Goes tik-tok.
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Clone, Copy)]
 pub struct Clock {
-    pub state: bool,
+    pub utime: u8,
+    pub halted: bool,
 }
 
 #[wasm_bindgen]
 impl Clock {
-    #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        Self { state: false }
+        Self {
+            utime: 0,
+            halted: false,
+        }
     }
-    /// One clock pulse is two ticks.
+    /// utime will overflow if it reaches 16
+    /// setting SR bit is preffered way of resetting it
     pub fn tick(&mut self) {
-        self.state = !self.state;
+        dbg!(self.utime);
+        self.utime = self.utime + 1;
+        self.utime &= 0b1111;
+        dbg!(self.utime);
     }
-    #[wasm_bindgen(getter)]
-    pub fn get_state(&self) -> bool {
-        self.state
+    pub fn rst(&mut self) {
+        self.utime = 0;
+    }
+    pub fn hlt(&mut self) {
+        self.halted = true;
     }
 }
-

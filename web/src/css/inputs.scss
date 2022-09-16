@@ -14,6 +14,10 @@ input:hover{
     border: 10px solid $fg_alt;
     background: $fg_alt;
 }
+input:active{
+  border: 10px solid $bg_alt;
+  background: $bg_alt;
+}
 
 input:disabled{
     cursor: default;
@@ -27,103 +31,66 @@ input:disabled{
     justify-content: space-evenly;
     text-align: center;
 }
-
-// container styling
 .checkbox {
   display: block;
   position: relative;
-  padding-left: 35px;
-  margin-bottom: 12px;
-  font-size: 22px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-/* Hide the browser's default checkbox */
-.checkbox input {
-    display: none;
-  // position: absolute;
-  // opacity: 0;
-  // height: 0;
-  // width: 0;
-  // margin: 0;
-  // border: 0;
-}
-
-/* Create a custom checkbox */
-.checkbox label {
-  position: absolute;
-  height: 25px;
-  width: 25px;
-  background-color: #eee;
-}
-
-/* On mouse-over, add a grey background color */
-.checkbox:hover input ~ .checkbox label {
-  background-color: #ccc;
+  padding-left: 45px;
+  margin-bottom: 15px;
   cursor: pointer;
+  font-size: 20px;
 }
 
-/* When the checkbox is checked, add a blue background */
-.checkbox input:checked ~ .checkbox label {
-  background-color: #2196F3;
+.checkbox input{
+  visibility: hidden;
+}
+.checkmark{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.checkmark {
+  fill: $fg;
+  width: 60px;
+  height: 40px;
+
 }
 
-/* Show the checkmark when checked */
-.checkbox input:checked ~ .checkbox label:after {
+.checkbox:hover input ~.checkmark{
+  background-color: gray;
+}
+
+// cursor in held down on the checkbox
+.checkbox input:active ~.checkmark{
+  background-color: purple;
+}
+
+// active checkbox background
+.checkbox input:checked ~.checkmark{
+  background-color: red;
+}
+
+
+.checkmark:after{
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox input:checked ~.checkmark:after{
   display: block;
+  align-content: center;
+  // left: 8px;
+  // bottom: 5px;
+  width: 20px;
+  height: 20px;
+  // border: solid white;
+  // border-width: 0 4px 4px 0;
+  // -webkit-transform: rotate(45deg);
+  // -ms-transform: rotate(45deg);
+  // transform: rotate(45deg);
 }
 
-/* Create the checkmark/indicator (hidden when not checked) */
-// .checkbox label:after {
-//   content: "";
-//   display: none;
-// }
-
-/* Style the checkmark/indicator */
 .checkbox label:after {
-  left: 9px;
-  top: 5px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 3px 3px 0;
-    background-image: url("data:image/svg+xml;base64, \
-PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjwh \
-LS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOC4xLjEsIFNWRyBFeHBvcnQgUGx1Zy1J \
-biAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4KCjxzdmcKICAgdmVyc2lvbj0iMS4x \
-IgogICBpZD0iQ2FwYV8xIgogICB4PSIwcHgiCiAgIHk9IjBweCIKICAgdmlld0JveD0iMCAwIDMy \
-IDMyIgogICBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzMiAzMjsiCiAgIHhtbDpz \
-cGFjZT0icHJlc2VydmUiCiAgIHNvZGlwb2RpOmRvY25hbWU9InJldHVybi10by1zdGFydC1zdmdy \
-ZXBvLWNvbS5zdmciCiAgIGlua3NjYXBlOnZlcnNpb249IjEuMi4xICg5YzZkNDFlNDEwLCAyMDIy \
-LTA3LTE0LCBjdXN0b20pIgogICB4bWxuczppbmtzY2FwZT0iaHR0cDovL3d3dy5pbmtzY2FwZS5v \
-cmcvbmFtZXNwYWNlcy9pbmtzY2FwZSIKICAgeG1sbnM6c29kaXBvZGk9Imh0dHA6Ly9zb2RpcG9k \
-aS5zb3VyY2Vmb3JnZS5uZXQvRFREL3NvZGlwb2RpLTAuZHRkIgogICB4bWxucz0iaHR0cDovL3d3 \
-dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9z \
-dmciPjxkZWZzCiAgIGlkPSJkZWZzNDQiIC8+PHNvZGlwb2RpOm5hbWVkdmlldwogICBpZD0ibmFt \
-ZWR2aWV3NDIiCiAgIHBhZ2Vjb2xvcj0iI2ZmZmZmZiIKICAgYm9yZGVyY29sb3I9IiMwMDAwMDAi \
-CiAgIGJvcmRlcm9wYWNpdHk9IjAuMjUiCiAgIGlua3NjYXBlOnNob3dwYWdlc2hhZG93PSIyIgog \
-ICBpbmtzY2FwZTpwYWdlb3BhY2l0eT0iMC4wIgogICBpbmtzY2FwZTpwYWdlY2hlY2tlcmJvYXJk \
-PSIwIgogICBpbmtzY2FwZTpkZXNrY29sb3I9IiNkMWQxZDEiCiAgIHNob3dncmlkPSJmYWxzZSIK \
-ICAgaW5rc2NhcGU6em9vbT0iMjIuNjI3NDE3IgogICBpbmtzY2FwZTpjeD0iLTAuNDQxOTQxNzQi \
-CiAgIGlua3NjYXBlOmN5PSIxOS45OTc4NjQiCiAgIGlua3NjYXBlOndpbmRvdy13aWR0aD0iMzg0 \
-MCIKICAgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iMjEwNCIKICAgaW5rc2NhcGU6d2luZG93LXg9 \
-IjAiCiAgIGlua3NjYXBlOndpbmRvdy15PSI1NiIKICAgaW5rc2NhcGU6d2luZG93LW1heGltaXpl \
-ZD0iMSIKICAgaW5rc2NhcGU6Y3VycmVudC1sYXllcj0iQ2FwYV8xIiAvPgo8ZwogICBpZD0iZzki \
-CiAgIHRyYW5zZm9ybT0icm90YXRlKDE4MCwxNiwxNikiPgoJPGcKICAgaWQ9ImZpcnN0Ij4KCQk8 \
-ZwogICBpZD0iZzYiPgoJCQk8cG9seWdvbgogICBzdHlsZT0iZmlsbDojMDMwMTA0IgogICBwb2lu \
-dHM9IjgsMTYgMzIsMCAzMiwzMiAiCiAgIGlkPSJwb2x5Z29uMiIgLz4KCQkJPHJlY3QKICAgeT0i \
-NCIKICAgc3R5bGU9ImZpbGw6IzAzMDEwNCIKICAgd2lkdGg9IjgiCiAgIGhlaWdodD0iMjQiCiAg \
-IGlkPSJyZWN0NCIKICAgeD0iMCIgLz4KCQk8L2c+Cgk8L2c+CjwvZz4KPGcKICAgaWQ9ImcxMSI+ \
-CjwvZz4KPGcKICAgaWQ9ImcxMyI+CjwvZz4KPGcKICAgaWQ9ImcxNSI+CjwvZz4KPGcKICAgaWQ9 \
-ImcxNyI+CjwvZz4KPGcKICAgaWQ9ImcxOSI+CjwvZz4KPGcKICAgaWQ9ImcyMSI+CjwvZz4KPGcK \
-ICAgaWQ9ImcyMyI+CjwvZz4KPGcKICAgaWQ9ImcyNSI+CjwvZz4KPGcKICAgaWQ9ImcyNyI+Cjwv \
-Zz4KPGcKICAgaWQ9ImcyOSI+CjwvZz4KPGcKICAgaWQ9ImczMSI+CjwvZz4KPGcKICAgaWQ9Imcz \
-MyI+CjwvZz4KPGcKICAgaWQ9ImczNSI+CjwvZz4KPGcKICAgaWQ9ImczNyI+CjwvZz4KPGcKICAg \
-aWQ9ImczOSI+CjwvZz4KPC9zdmc+Cg=="
-);
 }
 
 @keyframes pop-in {

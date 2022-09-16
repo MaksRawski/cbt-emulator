@@ -1,6 +1,5 @@
 import React from 'react';
 import './css/App.scss';
-// import init, { add, setup_logging } from 'cbt_emulator';
 import { CLK } from './Modules';
 
 
