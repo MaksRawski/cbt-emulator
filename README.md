@@ -3,9 +3,12 @@
 [CBT](https://gitlab.com/MaksRawski/cbt/) emulator written in rust compiled to webassembly with an interface in react.
 
 ## Microcode
+Refer to `ucode/README.md` for information about generating microcode.
 
-Real microcode is used although it had to be created with a slightly modified generator
-to produce single binary instead of 4 distinct ones for 4 EEPROMs.
-Diff for the generator is provided in `ucode/generator.diff` and the generated microcode in `ucode/ucode.bin`.
+Generated microcode gets compressed and then hardcoded into a binary, then decompressed at runtime.
+This way instead of throwing over 256KB into a binary we put just a bit shy (pun intended) of 1KB.
+`zstd` is used for compression so the runtime overhead isn't that big.
 
-Control word is 32-bits long so each word in microcode is encode as 4 bytes in big endian.
+## Tests
+Unit tests for the emulator itself are available to run via `cargo test`, 
+however its integration tests have to be run with `wasm-pack test --node`

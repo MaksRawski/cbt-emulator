@@ -18,10 +18,8 @@ impl Clock {
     /// utime will overflow if it reaches 16
     /// setting SR bit is preffered way of resetting it
     pub fn tick(&mut self) {
-        dbg!(self.utime);
         self.utime = self.utime + 1;
         self.utime &= 0b1111;
-        dbg!(self.utime);
     }
     pub fn rst(&mut self) {
         self.utime = 0;

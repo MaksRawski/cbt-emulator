@@ -73,6 +73,8 @@ impl Cpu {
             _ => 0,
         };
 
+        self.bus.0 = bus.clone();
+
         for i in 0..16 {
             match cw & 1 << i {
                 HLT => self.clock.hlt(),
@@ -96,12 +98,11 @@ impl Cpu {
                 _ => {}
             }
         }
-        if (cw & LCE | LCM) > 0 {
+        if cw & LCE > 0 && cw & LCM > 0 {
             self.lcd.cmd(bus);
         } else if (cw & LCE) > 0 {
             self.lcd.txt(bus);
         }
-        self.bus.0 = bus;
     }
     pub fn tick(&mut self) {
         self.cycle();
@@ -117,9 +118,48 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_lcd() {
+    fn test_fetching() {
         let mut cpu = Cpu::new();
         cpu.load_program(vec![42]);
-        assert_eq!(cpu.view_rom(), vec![42]);
+
+        for i in 0..3 {
+            let cw =
+                cpu.ucode
+                    .instruction_to_cw(&cpu.ir.0, &cpu.alu.flags.to_byte(), &cpu.clock.utime);
+
+            match i {
+                0 => assert_eq!(cw, LPO | LAI),
+                1 => assert_eq!(cw, HPO | HAI),
+                2 => assert_eq!(cw, PCC | MO | II),
+                _ => panic!(),
+            }
+
+            cpu.tick()
+        }
+        assert_eq!(cpu.ir.0, 42);
+    }
+    #[test]
+    fn test_mov() {
+        let mut cpu = Cpu::new();
+        // mov a, 42
+        cpu.load_program(vec![0b00_000_111, 42]);
+
+        // mov takes 6 steps
+        for _ in 0..6 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.ra.0, 42)
+    }
+    #[test]
+    fn test_lcd_out() {
+        let mut cpu = Cpu::new();
+        // mov lcd, 42
+        cpu.load_program(vec![0b00_110_111, 42]);
+
+        // mov takes 6 steps
+        for _ in 0..6 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.lcd.content()[0], 42);
     }
 }
