@@ -2,16 +2,16 @@ use crate::cw::*;
 
 /// Instance of loaded microcode
 pub struct Microcode {
-    bin: [u32; 65536],
+    bin: Vec<u32>,
 }
 
 impl Microcode {
     /// First decompresses the microcode
     /// then goes through it in chunks of 4 bytes to
-    /// convert it into an array of u32's.
+    /// convert it into an vector of u32's.
     pub fn load() -> Self {
-        let mut buf = [0u8; 262144];
-        let mut bin = [0u32; 65536];
+        let mut buf = Vec::<u8>::with_capacity(262144);
+        let mut bin = Vec::<u32>::with_capacity(65536);
 
         let compressed_ucode = include_bytes!("../ucode/ucode.zstd");
         let mut d = zstd_safe::DCtx::create();
@@ -19,17 +19,15 @@ impl Microcode {
         d.decompress(&mut buf, compressed_ucode)
             .expect("Failed to decompress microcode!");
 
-        let mut i = 0;
         for c in buf.chunks_exact(4) {
             // c __doesn't__ have a known size
-            // this ensures that it is in fact static array
+            // below ensures that it is in fact static array
             // of 4 bytes
             let mut bytes = [0u8; 4];
             for j in 0..4 {
                 bytes[j] = c[j];
             }
-            bin[i] = u32::from_be_bytes(bytes);
-            i += 1;
+            bin.push(u32::from_be_bytes(bytes));
         }
         Self { bin }
     }
@@ -67,13 +65,18 @@ mod test_microcode {
     #[test]
     fn test_instruction_to_cw() {
         let m = Microcode::load();
-        let cw = m.instruction_to_cw(&0, &0, &0);
-        // at utime = 0 we always fetch the instruction
-        // LPO | LAI (Low program counter out, low address in)
-        const LPO: u32 = 128;
-        const LAI: u32 = 2;
-        let expected_cw = LPO | LAI;
 
-        assert_eq!(cw, expected_cw);
+        // at utime 0..3 we always fetch the instruction
+        // 1. LPO | LAI      (low program counter out, low address in)
+        // 2. HPO | HAI      (high program counter out, high address in)
+        // 3. MO  | II | PCC (Low program counter out, low address in)
+        let cw = m.instruction_to_cw(&0, &0, &0);
+        assert_eq!(cw, LPO | LAI);
+
+        let cw = m.instruction_to_cw(&0, &0, &1);
+        assert_eq!(cw, HPO | HAI);
+
+        let cw = m.instruction_to_cw(&0, &0, &2);
+        assert_eq!(cw, MO | II | PCC);
     }
 }
