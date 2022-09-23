@@ -45,6 +45,7 @@ input:disabled{
 }
 .checkmark{
   position: absolute;
+  display: inline-block;
   top: 0;
   left: 0;
 }
@@ -52,21 +53,24 @@ input:disabled{
   fill: $fg;
   width: 60px;
   height: 40px;
+  padding: 1px;
+  background: #161620;
+  border-radius: 5px;
 
 }
 
 .checkbox:hover input ~.checkmark{
-  background-color: gray;
+  fill: $fg_alt;
 }
 
 // cursor in held down on the checkbox
 .checkbox input:active ~.checkmark{
-  background-color: purple;
+  fill: $fg;
 }
 
 // active checkbox background
 .checkbox input:checked ~.checkmark{
-  background-color: red;
+  fill: $active;
 }
 
 
@@ -81,8 +85,8 @@ input:disabled{
   align-content: center;
   // left: 8px;
   // bottom: 5px;
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   // border: solid white;
   // border-width: 0 4px 4px 0;
   // -webkit-transform: rotate(45deg);

@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import './css/App.scss';
-import { CLK } from './Modules';
+import { CLK } from './clk';
+import { Register } from './register';
+import { reactSetter, CPUModule } from './Modules';
 
-function App() {
-    const [clk, setCLK] = useState(false);
+declare global {
+    var clk: boolean
+    var setters: Map<String, reactSetter<any>>
+}
+
+const App = () => {
+    var clkSetter: reactSetter<boolean>
+    [global.clk, clkSetter] = useState(false);
+    global.setters = new Map
+    global.setters.set("clk", clkSetter);
     return (
         <div className="App">
             <header className="App-header">
@@ -11,42 +21,38 @@ function App() {
             </header>
             <div className="Modules">
                 <div className="Left-side">
-                    <CLK clkState={{ v: clk, d: setCLK }} />
-                    <CPUModule name="RAM" clk={clk} />
-                    <CPUModule name="MAR" clk={clk} />
-                    <CPUModule name="IR" clk={clk} />
-                    <CPUModule name="µT" clk={clk} />
+                    <CLK />
+                    {/*  wasm_name="RAM"*/}
+                    <CPUModule />
+                    {/*  wasm_name="MAR"*/}
+                    <CPUModule />
+                    {/*  wasm_name="IR"*/}
+                    <CPUModule />
+                    {/*  wasm_name="µT"*/}
+                    <CPUModule />
                 </div>
                 <div className="Right-side">
-                    <CPUModule name="PC" clk={clk} />
+                    <CPUModule wasm_name="PC" />
                     <div className="row">
-                        <CPUModule name="A" clk={clk} />
-                        <CPUModule name="C" clk={clk} />
+                        <Register wasm_name="ra" />
+                        <Register wasm_name="rb" />
                     </div>
-                    <CPUModule name="ALU" clk={clk} />
+                    <CPUModule wasm_name="ALU" />
                     <div className="row">
-                        <CPUModule name="B" clk={clk} />
-                        <CPUModule name="D" clk={clk} />
+                        <Register wasm_name="rc" />
+                        <Register wasm_name="rd" />
                     </div>
-                    <CPUModule name="FLAGS" clk={clk} />
-                    <CPUModule name="SP" clk={clk} />
-                    <CPUModule name="CW" clk={clk} />
+                    {/*  wasm_name="FLAGS"*/}
+                    <CPUModule />
+                    {/*  wasm_name="SP"*/}
+                    <CPUModule />
+                    {/*  wasm_name="CW"*/}
+                    <CPUModule />
                 </div>
             </div>
             <div className="footer"></div>
         </div>
     );
-}
-
-interface ModuleData {
-    name: string
-    clk: boolean,
-
-}
-class CPUModule extends React.Component<ModuleData> {
-    render() {
-        return <p>Module: {this.props.name}</p>
-    }
 }
 
 
