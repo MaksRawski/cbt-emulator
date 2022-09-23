@@ -6,7 +6,7 @@ export type reactDummySetter<V> = (reactSetter<V> | (() => void));
 let off = '○';
 let on = '●';
 
-function to_binary(n: number, width: number): string {
+export function to_binary(n: number, width: number): string {
     let res = "";
     for (let i = 0; i < width; i++) {
         res += n & (1 << i) ? on : off;
@@ -22,14 +22,14 @@ function to_binary(n: number, width: number): string {
 export class CPUModule<P, S, V> extends React.Component<P, S> {
     setter: reactDummySetter<V> = () => { };
 
-    checkSetter(module_name: string) {
-        let modSetter = global.setters.get(module_name);
-        if (modSetter !== undefined) {
-            this.setter = modSetter;
-        } else {
-            console.error("Missing setter for %s!", module_name);
-        }
-    }
+    /* checkSetter(module_name: string) {
+*     let modSetter = global.setters.get(module_name);
+*     if (modSetter !== undefined) {
+*         this.setter = modSetter;
+*     } else {
+*         console.error("Missing setter for %s!", module_name);
+*     }
+* } */
     render() {
         return <div>CPUModule</div>
     }

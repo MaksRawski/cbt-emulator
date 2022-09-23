@@ -11,7 +11,6 @@ export class Register extends CPUModule<regProps, {}, number> {
 
     constructor(props: regProps) {
         super(props);
-
         // (REACT)
         // in those constructors add cpu.hash_map entry with wasm_name as key
         // and useState setter as value

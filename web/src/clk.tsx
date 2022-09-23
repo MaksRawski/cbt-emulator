@@ -1,45 +1,46 @@
 import React from 'react';
 import { cpu } from './cpu';
-import { CPUModule } from './Modules';
 
 let off = '○';
 let on = '●';
 
 interface CLKstate {
     speed: number,
-    auto: boolean
+    auto: boolean,
+    v: boolean,
 }
 
-
-/* interface CLKprops {
-*     clkState: { v: boolean, d: React.Dispatch<React.SetStateAction<boolean>> }
-* } */
-
-export class CLK extends CPUModule<{}, CLKstate, boolean> {
+export class CLK extends React.Component<{}, CLKstate> {
     private autoID?: NodeJS.Timer;
 
     constructor(props: any) {
         super(props);
-        this.checkSetter("clk");
 
         // - value: current clock edge
         // - speed: clock speed in hz,
         // - auto: determines whether the clock should tick on its own
-        this.state = { auto: false, speed: 1 };
+        this.state = { auto: false, speed: 1, v: false };
 
+        // react by default doesn't bind methods to itself (why????)
         this.updateSpeed = this.updateSpeed.bind(this);
         this.tick = this.tick.bind(this);
         this.auto = this.auto.bind(this);
 
     }
     tick() {
-        if (global.clk === true) return
+        if (this.state.v === true) return
         cpu.tick();
-        this.setter(true);
+        /* console.log("[%d.%d] instruction: %d, bus: %d", cpu.pc.lo(), cpu.clock.utime, cpu.ir[0], cpu.bus[0]); */
+        this.setState({ v: true });
 
         setTimeout(() => {
-            this.setter(false);
+            this.setState({ v: false });
         }, 1000 / this.state.speed);
+
+        if (cpu.pc.lo() === 38) {
+            console.log("done!");
+            console.log("LCD: ", cpu.lcd.content());
+        }
     }
     auto() {
         if (this.state.auto) {
@@ -65,7 +66,6 @@ export class CLK extends CPUModule<{}, CLKstate, boolean> {
             this.autoID = setInterval(this.tick, 1000 / this.state.speed);
 
         }
-
     }
     render() {
         return (
@@ -82,7 +82,7 @@ export class CLK extends CPUModule<{}, CLKstate, boolean> {
                         </svg>
                     </label>
                 </div>
-                <p className="LED">{clk ? on : off}</p>
+                <p className="LED">{this.state.v ? on : off}</p>
                 <input type="range" name="speed" min="0" max="1000" onChange={this.updateSpeed} />
                 <p className="speedValue">{this.state.speed}</p>
             </div >

@@ -4,16 +4,7 @@ import { CLK } from './clk';
 import { Register } from './register';
 import { reactSetter, CPUModule } from './Modules';
 
-declare global {
-    var clk: boolean
-    var setters: Map<String, reactSetter<any>>
-}
-
 const App = () => {
-    var clkSetter: reactSetter<boolean>
-    [global.clk, clkSetter] = useState(false);
-    global.setters = new Map
-    global.setters.set("clk", clkSetter);
     return (
         <div className="App">
             <header className="App-header">
