@@ -21,7 +21,7 @@ pub struct Lcd {
 
 #[derive(Copy, Clone, Debug)]
 pub struct Display {
-    pub buffer: [u8; 40],
+    pub buffer: [u8; 80],
     two_line_mode: bool,
     on: bool,
 }
@@ -54,16 +54,17 @@ impl Cursor {
         self.visible = false;
     }
     pub fn location(&self) -> usize {
-        self.row as usize * 40 + self.column as usize
+        self.row as usize * 80 + self.column as usize
     }
     pub fn increment(&mut self) {
-        if self.column == 39 {
+        if self.column == 79 {
             if self.row == 0 {
                 self.row = 1;
                 self.column = 0;
             } else {
-                self.row = 0;
-                self.column = 0;
+                return;
+                // self.row = 0;
+                // self.column = 0;
                 // or go out of buffer
                 // or do nothing
             }
@@ -75,7 +76,7 @@ impl Cursor {
         if self.column == 0 {
             if self.row == 1 {
                 self.row = 0;
-                self.column = 39;
+                self.column = 79;
             }
         } else {
             self.column -= 1;
@@ -90,13 +91,13 @@ impl Cursor {
 impl Display {
     pub fn new() -> Self {
         Self {
-            buffer: [0; 40],
+            buffer: [0; 80],
             on: false,
             two_line_mode: false,
         }
     }
     pub fn clear(&mut self) {
-        self.buffer = [0; 40];
+        self.buffer = [0; 80];
     }
     pub fn add(&mut self, cur: &mut Cursor, charcode: u8) {
         self.buffer[cur.location()] = charcode;
@@ -107,19 +108,19 @@ impl Display {
         cur.increment();
     }
     pub fn shift_right(&mut self) {
-        let mut new_buffer = [0u8; 40];
+        let mut new_buffer = [0u8; 80];
         new_buffer[0] = 0;
-        for i in 1..40 {
+        for i in 1..80 {
             new_buffer[i] = self.buffer[i - 1];
         }
         self.buffer = new_buffer;
     }
     pub fn shift_left(&mut self) {
-        let mut new_buffer = [0u8; 40];
-        for i in 0..39 {
+        let mut new_buffer = [0u8; 80];
+        for i in 0..79 {
             new_buffer[i] = self.buffer[i + 1];
         }
-        new_buffer[39] = 0;
+        new_buffer[79] = 0;
         self.buffer = new_buffer;
     }
 
@@ -168,15 +169,19 @@ impl Lcd {
             }
             10 => self.display.off(),
             0xc => self.cursor.hide(),
-            0xe | 0xf => {
+            0xf => {
                 self.display.on();
+                self.cursor.show();
                 self.cursor.blinking = true;
             }
             0x10 => self.cursor.decrement(),
             0x14 => self.cursor.increment(),
             0x18 => self.display.shift_left(),
             0x1c => self.display.shift_right(),
-            0x38 => self.display.two_line_mode(),
+            0x38 => {
+                // 8 bit mode and
+                self.display.two_line_mode()
+            }
             0x80 => self.cursor.return_home(),
             0xc0 => self.cursor.second_row(),
             _ => {}
@@ -186,8 +191,16 @@ impl Lcd {
 
 #[wasm_bindgen]
 impl Lcd {
-    pub fn content(&self) -> Vec<u8> {
-        Vec::from(self.display.buffer)
+    /// returns vector of 32 bytes (if the display is on)
+    pub fn content(&self) -> Option<Vec<u8>> {
+        if self.display.on {
+            let mut out = Vec::with_capacity(32);
+            out.append(&mut self.display.buffer[0..16].to_vec());
+            out.append(&mut self.display.buffer[64..80].to_vec());
+
+            return Some(Vec::from(self.display.buffer));
+        }
+        None
     }
 }
 
@@ -219,14 +232,14 @@ mod test_lcd {
     #[test]
     fn cursor_manual_increment() {
         let mut lcd = Lcd::new();
-        for _ in 0..40 {
+        for _ in 0..80 {
             lcd.cmd(6);
         }
         assert_eq!(lcd.cursor.row, 1);
         assert_eq!(lcd.cursor.column, 0);
         lcd.cmd(4);
         assert_eq!(lcd.cursor.row, 0);
-        assert_eq!(lcd.cursor.column, 39);
+        assert_eq!(lcd.cursor.column, 79);
         lcd.cmd(0xc0);
         assert_eq!(lcd.cursor.row, 1);
         assert_eq!(lcd.cursor.column, 0);
@@ -245,4 +258,10 @@ mod test_lcd {
     //     let mut chars = lcd.display.buffer[0].chars();
     //     assert_eq!(chars.next(), Some('A'));
     // }
+    #[test]
+    fn test_init() {
+        // mov lcdc, 0x1 				; clear display
+        // mov lcdc, 0xF 				; display on, cursor on, blinking on
+        // mov lcdc, 0x38 				; function set: 8 bit words, 2 lines
+    }
 }

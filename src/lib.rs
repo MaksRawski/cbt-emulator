@@ -10,6 +10,7 @@ pub mod clock;
 pub mod cpu;
 #[allow(dead_code)]
 pub mod cw;
+pub mod js;
 pub mod lcd;
 pub mod memory;
 pub mod microcode;
@@ -18,6 +19,7 @@ pub mod reg;
 
 use wasm_bindgen::prelude::*;
 
+// wee_alloc is smaller but also slower allocator
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 // #[cfg(feature = "wee_alloc")]
@@ -32,6 +34,14 @@ pub fn setup_logging() {
 }
 
 #[wasm_bindgen]
-pub fn my_add(a: u8, b: u8) -> u8 {
-    a + b
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
+
+// #[wasm_bindgen(start)]
+// pub fn run() {
+//     log(&format!("Hello from {}!", name())); // should output "Hello from Rust!"
+
+//     let r = reg::Register::new();
+// }

@@ -5,7 +5,7 @@ use std::num::Wrapping;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct ProgramCounter(u16);
 
 #[wasm_bindgen]

@@ -17,8 +17,7 @@ const App = () => {
                     <CPUModule />
                     {/*  wasm_name="MAR"*/}
                     <CPUModule />
-                    {/*  wasm_name="IR"*/}
-                    <CPUModule />
+                    <Register wasm_name="ir" />
                     {/*  wasm_name="µT"*/}
                     <CPUModule />
                 </div>
@@ -35,8 +34,7 @@ const App = () => {
                     </div>
                     {/*  wasm_name="FLAGS"*/}
                     <CPUModule />
-                    {/*  wasm_name="SP"*/}
-                    <CPUModule />
+                    <Register wasm_name="sp" />
                     {/*  wasm_name="CW"*/}
                     <CPUModule />
                 </div>

@@ -1,3 +1,5 @@
+use std::num::Wrapping;
+
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
@@ -18,11 +20,13 @@ impl Clock {
     /// utime will overflow if it reaches 16
     /// setting SR bit is preffered way of resetting it
     pub fn tick(&mut self) {
-        self.utime = self.utime + 1;
-        self.utime &= 0b1111;
+        if !self.halted {
+            self.utime = (Wrapping(self.utime) + Wrapping(1)).0;
+            self.utime &= 0b1111;
+        }
     }
     pub fn rst(&mut self) {
-        self.utime = 0;
+        self.utime = u8::MAX;
     }
     pub fn hlt(&mut self) {
         self.halted = true;

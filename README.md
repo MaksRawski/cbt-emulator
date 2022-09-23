@@ -12,3 +12,9 @@ This way instead of throwing over 256KB into a binary we put just a bit shy (pun
 ## Tests
 Unit tests for the emulator itself are available to run via `cargo test`, 
 however its integration tests have to be run with `wasm-pack test --node`
+
+
+## TODO
+1. instead of polling in react, fire events inside modules in emulator, 
+which would be somehow received through wasm. This would also make debugging much easier.
+

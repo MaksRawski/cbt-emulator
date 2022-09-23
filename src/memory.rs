@@ -35,12 +35,11 @@ impl Memory {
     }
 
     /// returns err if tried to write into rom
-    pub fn i(&mut self, v: u8) -> Result<(), ()> {
+    pub fn i(&mut self, v: u8) {
         if self.address < ROM_SIZE {
-            return Err(());
+            return;
         }
         self.ram.0[(self.address - ROM_SIZE) as usize] = v;
-        Ok(())
     }
     /// low address in
     pub fn lai(&mut self, a: u8) {
