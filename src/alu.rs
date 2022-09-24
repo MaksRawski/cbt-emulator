@@ -47,12 +47,14 @@ impl Flags {
 /// Arithmetic Logic Unit.
 pub struct ALU {
     pub flags: Flags,
+    pub res: u8,
 }
 
 impl ALU {
     pub fn new() -> Self {
         Self {
             flags: Flags::new(),
+            res: 0,
         }
     }
 }
@@ -264,7 +266,7 @@ mod test_subtracting {
         assert_eq!(alu.sub(0, 0), 0);
         assert_eq!(alu.flags.z, true);
 
-        assert_eq!(alu.sub(255, 255), 0);
+        assert_eq!(alu.sub(1, 1), 0);
         assert_eq!(alu.flags.z, true);
 
         assert_eq!(alu.sub(0, 1), 255);

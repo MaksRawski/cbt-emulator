@@ -27,6 +27,9 @@ impl Register {
     /// when setter is None error will be displayed in console.error
     pub fn i(&mut self, v: u8) {
         self.data = v;
-        update_dom_number(&format!("{}", self.wasm_name), v);
+
+        if cfg!(target_family = "wasm") {
+            update_dom_number(&self.wasm_name, v);
+        }
     }
 }

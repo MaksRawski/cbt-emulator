@@ -34,49 +34,21 @@ pub const LCE: u32 = 1 << 29;
 pub const SPO: u32 = 1 << 30;
 pub const SPI: u32 = 1 << 31;
 
-// RI=(
-//     AI,   #000
-//     BI,   #001
-//     CI,   #010
-//     DI,   #011
-//     SPI,  #100
-//     LPI,  #101
-//     LCE,  #110
-//     000   #111
-// )
+// from ucode/instructions.py
+pub const NOT_A: u32 = ALE;
+pub const A_NOR_B: u32 = AL0 | ALE;
+pub const A_NAND_B: u32 = AL2 | ALE;
+pub const NOT_B: u32 = AL2 | AL0 | ALE;
+pub const A_XOR_B: u32 = AL2 | AL1 | ALE;
+pub const A_XNOR_B: u32 = AL3 | AL0 | ALE;
+pub const A_AND_B: u32 = AL3 | AL1 | AL0 | ALE;
+pub const A_OR_B: u32 = AL3 | AL2 | AL1 | ALE;
 
-// RO=(
-//     AO,   #000
-//     BO,   #001
-//     CO,   #010
-//     DO,   #011
-//     SPO,  #100
-//     LPO,  #101
-//     000,  #110
-//     000   #111
-// )
-
-// # register pair
-// RP=(
-//     [
-//         DO|HAI,
-//         CO|LAI,
-//     ],
-
-//     [
-//         CO|HAI,
-//         BO|LAI,
-//     ],
-
-//     [
-//         BO|HAI,
-//         AO|LAI,
-//     ],
-
-//     [
-//         DO|HAI,
-//         AO|LAI,
-//     ]
-// )
-
-// DATA=[SR|PCC]*65536
+pub const ADD_A_B: u32 = ALM | AL3 | AL0 | ALE;
+pub const ADC_A_B: u32 = ALM | ALC | AL3 | AL0 | ALE;
+pub const SUB_A_B: u32 = ALM | ALC | AL2 | AL1 | ALE;
+pub const SBC_A_B: u32 = ALM | AL2 | AL1 | ALE;
+pub const CMP_A_B: u32 = ALM | ALC | AL2 | AL1 | ALE;
+pub const INC_A: u32 = ALM | ALC | ALE;
+pub const DEC_A: u32 = ALM | AL3 | AL2 | AL1 | AL0 | ALE;
+pub const SHL_A: u32 = ALM | AL3 | AL2 | ALE;

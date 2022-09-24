@@ -33,12 +33,6 @@ pub fn setup_logging() {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 }
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
 // #[wasm_bindgen(start)]
 // pub fn run() {
 //     log(&format!("Hello from {}!", name())); // should output "Hello from Rust!"

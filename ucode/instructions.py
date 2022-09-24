@@ -391,7 +391,8 @@ def alu(opcode, utime, flags):
         ALM|AL3|AL2|AL1|AL0|ALE, # DEC A
         ALM|AL3|AL2|ALE # DBL A/SHIFT LEFT A
     ]
-    
+
+    # if just comparing then do nothing with the result
     if op==0b1100:
         data=[
             RO[src]|ops[op]

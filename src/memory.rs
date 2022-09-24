@@ -12,9 +12,9 @@ pub const RAM_SIZE: u16 = 32768;
 pub const ROM_SIZE: u16 = 32768;
 
 pub struct Memory {
-    ram: Ram,
-    rom: Rom,
-    address: u16,
+    pub ram: Ram,
+    pub rom: Rom,
+    pub address: u16,
 }
 
 impl Memory {
@@ -30,11 +30,14 @@ impl Memory {
         if self.address < ROM_SIZE {
             *self.rom.0.get(self.address as usize).unwrap_or(&0u8)
         } else {
-            *self.ram.0.get(self.address as usize).unwrap_or(&0u8)
+            *self
+                .ram
+                .0
+                .get(self.address as usize - 0x8000)
+                .unwrap_or(&0u8)
         }
     }
 
-    /// returns err if tried to write into rom
     pub fn i(&mut self, v: u8) {
         if self.address < ROM_SIZE {
             return;
@@ -54,7 +57,7 @@ impl Memory {
     }
 }
 
-pub struct Ram(Vec<u8>);
+pub struct Ram(pub Vec<u8>);
 
 pub struct Rom(Vec<u8>);
 
@@ -74,10 +77,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_addressing() {
-        let mut mem = Memory::new(vec![42, 1, 23]);
-        mem.lai(2);
+    fn test_rom_addressing() {
+        let mut mem = Memory::new(vec![1, 2, 34]);
         mem.hai(0);
-        assert_eq!(mem.o(), 23);
+        mem.lai(2);
+
+        assert_eq!(mem.o(), 34);
+    }
+    #[test]
+    fn test_ram_addressing() {
+        let mut mem = Memory::new(vec![]);
+        mem.ram.0[0] = 42;
+
+        mem.hai(0x80);
+        mem.lai(0);
+
+        assert_eq!(mem.o(), 42);
     }
 }

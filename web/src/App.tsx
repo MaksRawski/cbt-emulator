@@ -27,13 +27,14 @@ const App = () => {
                         <Register wasm_name="ra" />
                         <Register wasm_name="rb" />
                     </div>
-                    <CPUModule wasm_name="ALU" />
+                    <div className="row">
+                        <CPUModule wasm_name="ALU" />
+                        <Register wasm_name="flags" />
+                    </div>
                     <div className="row">
                         <Register wasm_name="rc" />
                         <Register wasm_name="rd" />
                     </div>
-                    {/*  wasm_name="FLAGS"*/}
-                    <CPUModule />
                     <Register wasm_name="sp" />
                     {/*  wasm_name="CW"*/}
                     <CPUModule />

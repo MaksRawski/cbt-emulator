@@ -157,17 +157,17 @@ impl Lcd {
     }
     pub fn cmd(&mut self, cmd: u8) {
         match cmd {
-            1 => self.clr(),
-            2 => self.cursor.return_home(),
-            4 => self.cursor.decrement(),
-            6 => self.cursor.increment(),
-            5 => self.display.shift_right(),
-            7 => self.display.shift_left(),
-            8 => {
+            0x1 => self.clr(),
+            0x2 => self.cursor.return_home(),
+            0x4 => self.cursor.decrement(),
+            0x6 => self.cursor.increment(),
+            0x5 => self.display.shift_right(),
+            0x7 => self.display.shift_left(),
+            0x8 => {
                 self.display.off();
                 self.cursor.hide();
             }
-            10 => self.display.off(),
+            0xa => self.display.off(),
             0xc => self.cursor.hide(),
             0xf => {
                 self.display.on();
@@ -201,6 +201,13 @@ impl Lcd {
             return Some(Vec::from(self.display.buffer));
         }
         None
+    }
+    pub fn string_content(&self) -> Option<String> {
+        if let Some(v) = self.content() {
+            let s = v.iter().map(|c| *c as char).collect::<String>();
+            return Some(s);
+        }
+        return None;
     }
 }
 
@@ -244,20 +251,24 @@ mod test_lcd {
         assert_eq!(lcd.cursor.row, 1);
         assert_eq!(lcd.cursor.column, 0);
     }
-    // #[test]
-    // fn shifts() {
-    //     let mut lcd = Lcd::new();
-    //     lcd.txt(65);
+    #[test]
+    fn shifts() {
+        let mut lcd = Lcd::new();
+        lcd.txt(65);
+        lcd.txt(66);
+        lcd.txt(67);
 
-    //     lcd.cmd(0x1c);
-    //     let mut chars = lcd.display.buffer[0].chars();
-    //     assert_eq!(chars.next(), Some('\0'));
-    //     assert_eq!(chars.next(), Some('A'));
+        // turn on
+        lcd.cmd(0xf);
 
-    //     lcd.cmd(0x18);
-    //     let mut chars = lcd.display.buffer[0].chars();
-    //     assert_eq!(chars.next(), Some('A'));
-    // }
+        // shift right
+        lcd.cmd(0x1c);
+        assert_eq!(lcd.string_content().unwrap()[0..4], "\0ABC".to_string());
+
+        // shift left
+        lcd.cmd(0x18);
+        assert_eq!(lcd.string_content().unwrap()[0..3], "ABC".to_string());
+    }
     #[test]
     fn test_init() {
         // mov lcdc, 0x1 				; clear display
