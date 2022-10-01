@@ -1,0 +1,21 @@
+.test: &test-template
+  before_script:
+    - env
+    - pwd
+    - ls
+    - ls /usr/local/cargo -la
+
+  script:
+    - cargo test
+
+  cache:
+    paths:
+      - target
+
+test:stable:
+  image: rust
+  <<: *test-template
+
+test:nightly:
+  image: rustlang/rust
+  <<: *test-template
