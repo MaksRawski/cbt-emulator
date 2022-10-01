@@ -25,12 +25,6 @@ input:disabled{
     border: 10px solid $bg_alt;
     background: $bg_alt;
 }
-.clockMode{
-    display: flex;
-    flex-flow: row;
-    justify-content: space-evenly;
-    text-align: center;
-}
 .checkbox {
   display: block;
   position: relative;

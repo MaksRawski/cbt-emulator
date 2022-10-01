@@ -2,4 +2,4 @@ Cargo.lock
 target/
 pkg/
 .log/
-ucode/__pycache__
+ucode/__pycache__/

@@ -69,7 +69,7 @@ export class CLK extends React.Component<{}, CLKstate> {
     }
     render() {
         return (
-            <div>
+            <div className="clock">
                 <div className="clockMode">
                     <input type="button" disabled={this.state.auto} value="PULSE" onClick={this.tick} />
                     <label className="checkbox">

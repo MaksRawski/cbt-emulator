@@ -1,13 +1,11 @@
-use std::collections::HashMap;
-
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
 
 use crate::alu::ALU;
 use crate::bus::Bus;
 use crate::clock::Clock;
 use crate::cw::*;
 
+use crate::js::update_dom_number;
 use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
@@ -45,15 +43,15 @@ impl Cpu {
             bus: Bus(0),
             clock: Clock::new(),
             ucode: Microcode::load(),
-            ir: Register::new("ir"),
+            ir: Register::new("IR"),
             mem: Memory::new(vec![]),
             pc: ProgramCounter::new(),
 
-            ra: Register::new("ra"),
-            rb: Register::new("rb"),
-            rc: Register::new("rc"),
-            rd: Register::new("rd"),
-            sp: Register::new("sp"),
+            ra: Register::new("RA"),
+            rb: Register::new("RB"),
+            rc: Register::new("RC"),
+            rd: Register::new("RD"),
+            sp: Register::new("SP"),
 
             alu: ALU::new(),
             lcd: Lcd::new(),
@@ -140,7 +138,10 @@ impl Cpu {
                         self.alu.res
                     }
                 }
-            }
+            };
+            // in the interface display flags normally,
+            // not how microcode wants it
+            update_dom_number("FLAGS", (self.alu.flags.to_byte() ^ 0b11).into(), 4);
         }
 
         if cw & LCE > 0 && cw & LCM > 0 {

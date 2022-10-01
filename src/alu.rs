@@ -1,5 +1,7 @@
 use std::num::Wrapping;
 
+use crate::js::update_dom_number;
+
 #[derive(Debug)]
 /// c - Carry flag
 /// h - Half-Carry flag
@@ -27,6 +29,7 @@ pub struct Flags {
 
 impl Flags {
     pub fn new() -> Self {
+        update_dom_number("FLAGS", 0, 4);
         Self {
             c: false,
             h: false,
