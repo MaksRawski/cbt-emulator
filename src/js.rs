@@ -31,7 +31,7 @@ pub fn update_dom_element(element_id: &str, value: &str) {
     }
 }
 
-pub fn update_dom_number(element_id: &str, value: u16, width: u8) {
+pub fn update_dom_number(element_id: &str, value: u32, width: u8) {
     if cfg!(target_family = "wasm") {
         update_dom_element(element_id, &to_binary_chars(value.into(), width));
 
@@ -42,7 +42,7 @@ pub fn update_dom_number(element_id: &str, value: u16, width: u8) {
     }
 }
 
-fn to_binary_chars(num: u16, width: u8) -> String {
+fn to_binary_chars(num: u32, width: u8) -> String {
     let mut res = String::new();
     for i in (0..width).rev() {
         if (i + 1) % 8 == 0 && i < width - 1 {

@@ -51,13 +51,13 @@ impl Memory {
     pub fn lai(&mut self, a: u8) {
         self.address = a as u16 | (self.address & 0b1111_1111 << 8);
         update_dom_number("RAM", self.o().into(), 8);
-        update_dom_number("MAR", self.address, 16);
+        update_dom_number("MAR", self.address.into(), 16);
     }
     /// high address in
     pub fn hai(&mut self, a: u8) {
         self.address = (a as u16) << 8 | (self.address & 0b1111_1111);
         update_dom_number("RAM", self.o().into(), 8);
-        update_dom_number("MAR", self.address, 16);
+        update_dom_number("MAR", self.address.into(), 16);
     }
     pub fn view_rom(&self) -> &Vec<u8> {
         &self.rom.0

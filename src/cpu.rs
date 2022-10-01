@@ -39,6 +39,8 @@ pub struct Cpu {
 #[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Self {
+        update_dom_number("CW", 0, 32);
+        update_dom_number("BUS", 0, 8);
         Self {
             bus: Bus(0),
             clock: Clock::new(),
@@ -67,6 +69,7 @@ impl Cpu {
             &self.alu.flags.to_byte(),
             &self.clock.utime,
         );
+        update_dom_number("CW", cw, 32);
 
         let bus = match cw {
             cw if (cw & AO > 0) => self.ra.o(),
@@ -83,6 +86,7 @@ impl Cpu {
         };
 
         self.bus.0 = bus.clone();
+        update_dom_number("BUS", self.bus.0.into(), 8);
 
         for i in 0..32 {
             match cw & 1 << i {

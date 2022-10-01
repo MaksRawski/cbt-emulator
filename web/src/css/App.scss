@@ -58,6 +58,7 @@
 
 div.BUS{
   justify-content: flex-start;
+  margin: 1px;
 }
 
 .clock{
@@ -69,4 +70,9 @@ div.BUS{
   display: flex;
   flex-flow: row;
   justify-content: center;
+}
+
+.CW{
+  flex-wrap: 1;
+  width: 40vw;
 }

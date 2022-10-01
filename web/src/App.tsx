@@ -35,7 +35,9 @@ const App = () => {
                         <ModuleTemplate name="RD" />
                     </div>
                     <ModuleTemplate name="SP" />
-                    <ModuleTemplate name="CW" />
+                    <div className="CW">
+                        <ModuleTemplate name="CW" />
+                    </div>
                 </div>
             </div>
             <div className="footer"></div>
