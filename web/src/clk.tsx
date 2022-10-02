@@ -1,5 +1,7 @@
 import React from 'react';
 import { cpu } from './cpu';
+import Slider from '@mui/material/Slider';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 let off = '○';
 let on = '●';
@@ -51,21 +53,21 @@ export class CLK extends React.Component<{}, CLKstate> {
             this.autoID = setInterval(this.tick, 1000 / this.state.speed);
         }
     }
-    updateSpeed() {
-        // logarithmic slider
-        // https://stackoverflow.com/a/846249
-        let speedRange = document.querySelector("input[name='speed']") as HTMLInputElement;
-        let position = parseInt(speedRange.value);
-        let max = parseInt(speedRange.max);
-        let scale = Math.log(max) / max;
-        let speed = Math.exp(scale * position);
+    updateSpeed(ev: Event, value: number | Array<number>, activeThumb: number) {
+        value = value as number;
+        /* let speedRange = document.querySelector("") as HTMLInputElement; */
+        /* let scale = Math.log(max) / max; */
+        /* let speed = Math.exp(scale * this.state.speed); */
 
-        this.setState({ speed: Math.floor(speed) })
+        this.setState({ speed: this.speedScale(value) })
         clearInterval(this.autoID);
         if (this.state.auto) {
             this.autoID = setInterval(this.tick, 1000 / this.state.speed);
-
         }
+    }
+    /** logarithmic slider: https://stackoverflow.com/a/846249 */
+    speedScale(v: number) {
+        return Math.round(Math.exp(v * Math.log(1000) / 1000));
     }
     render() {
         return (
@@ -81,10 +83,21 @@ export class CLK extends React.Component<{}, CLKstate> {
                             </g>
                         </svg>
                     </label>
+                    <p className="LED">{this.state.v ? on : off}</p>
                 </div>
-                <p className="LED">{this.state.v ? on : off}</p>
-                <input type="range" name="speed" min="0" max="1000" onChange={this.updateSpeed} />
-                <p className="speedValue">{this.state.speed}</p>
+                <div>
+                    <SpeedIcon />
+                    <Slider
+                        min={1}
+                        step={1}
+                        max={1000}
+                        defaultValue={4}
+                        scale={this.speedScale}
+                        valueLabelDisplay="auto"
+                        arial-label="Speed"
+                        aria-valuetext="Hz"
+                        onChange={this.updateSpeed} />
+                </div>
             </div >
         );
     }

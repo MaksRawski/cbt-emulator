@@ -7,20 +7,20 @@ const App = () => {
     return (
         <div className="App">
             <header className="App-header">
-                CBT emulator
+                <a href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
             </header>
-            <div className="Modules">
-                <div className="Left-side">
+            <div className="modules">
+                <div className="left-side">
                     <CLK />
                     <ModuleTemplate name="RAM" />
                     <ModuleTemplate name="MAR" />
                     <ModuleTemplate name="IR" />
-                    <ModuleTemplate name="µTime" id="utime" />
+                    <ModuleTemplate name="µT" id="utime" />
                 </div>
                 <div className='BUS'>
                     <ModuleTemplate name="BUS" />
                 </div>
-                <div className="Right-side">
+                <div className="right-side">
                     <ModuleTemplate name="PC" />
                     <div className="row">
                         <ModuleTemplate name="RA" />
@@ -41,7 +41,7 @@ const App = () => {
                 </div>
             </div>
             <div className="footer"></div>
-        </div>
+        </div >
     );
 }
 

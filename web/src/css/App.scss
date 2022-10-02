@@ -1,33 +1,40 @@
 @import './vars';
-@import './inputs';
+@import './elements';
 
-.App {
+body{
   background-color: $bg;
+}
+.App {
   min-height: 100vh;
   min-width: 100vw;
   color: $font;
-  display: flex;
-  flex-direction: column;
 
 }
 
 .App-header {
   margin: 20px;
-  font-size: 4vh;
+  font-size: calc(1.8em + 1vh);
 
 }
 
-.Modules{
-  display: flex;
-  flex-flow: row;
+.modules{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  // height: 85vh;
+  // margin: 0 auto;
+  // margin-right: 12px;
+  // margin-top: 12px;
+}
+
+.modules > *{
+  // display: flex;
+  // flex-flow: column;
   justify-content: space-evenly;
-  height: 85vh;
-}
+  width: auto;
+	grid-auto-rows: 1fr;
+  grid-column-gap: 30px;
+  grid-row-gap: 30px;
 
-.Modules > *{
-  display: flex;
-  flex-flow: column;
-  justify-content: space-between;
 }
 
 .row{
@@ -37,11 +44,12 @@
 }
 .row > *{
   flex: 1;
-  padding: 5px;
+  // padding: 5px;
 }
 
 .module{
   text-align: center;
+  padding: 5px;
 }
 
 .module-header{
@@ -50,6 +58,7 @@
 }
 
 .LED{
+  font-kerning: 0;
   font-size: 2em;
   margin: 0;
   padding: 0;
@@ -58,15 +67,18 @@
 
 div.BUS{
   justify-content: flex-start;
+  border: 3px solid $fg;
+  border-radius: 10px;
   margin: 1px;
 }
 
 .clock{
-  text-align: center;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
 }
 
-.clockMode{
-  margin-bottom: 10px;
+.clock > *{
   display: flex;
   flex-flow: row;
   justify-content: center;
