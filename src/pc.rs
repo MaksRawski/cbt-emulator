@@ -19,7 +19,7 @@ impl ProgramCounter {
     pub fn c(&mut self) {
         self.0 = (Wrapping(self.0) + Wrapping(1u16)).0;
 
-        update_dom_number("PC", 0, 16);
+        update_dom_number("PC", self.0.into(), 16);
     }
     pub fn lo(&self) -> u8 {
         (self.0 & 0b1111_1111) as u8
