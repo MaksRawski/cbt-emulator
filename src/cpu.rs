@@ -146,6 +146,7 @@ impl Cpu {
             };
             // in the interface display flags normally,
             // not how microcode wants it
+            update_dom_number("ALU", self.alu.res.into(), 8);
             update_dom_number("FLAGS", (self.alu.flags.to_byte() ^ 0b11).into(), 4);
         }
 
