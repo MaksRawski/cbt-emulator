@@ -73,19 +73,16 @@ export class CLK extends React.Component<{}, CLKstate> {
         return (
             <div className="clock">
                 <div className="clockMode">
-                    <input type="button" disabled={this.state.auto} value="PULSE" onClick={this.tick} />
-                    <label className="checkbox">
-                        <input type="checkbox" name="auto" onClick={this.auto} />
-                        <svg className="checkmark" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox='0 0 32 32'>
-                            <g transform="rotate(180,16,16)">
-                                <polygon points="8,16 32,0 32,32 " />
-                                <rect y="4" width="8" height="24" x="0" />
-                            </g>
-                        </svg>
-                    </label>
-                    <p className="LED">{this.state.v ? on : off}</p>
+                    <Button variant="contained"
+                        disabled={this.state.auto}
+                        onClick={this.tick}
+                    >PULSE</Button>
+                    <IconButton sx={{ borderRadius: "5px" }} onClick={this.auto}>
+                        <PlayArrow sx={{ fontSize: "1.8em", display: this.state.auto ? "none" : "block" }} />
+                        <Pause sx={{ fontSize: "1.8em", display: !this.state.auto ? "none" : "block", color: "white" }} />
+                    </IconButton>
                 </div>
-                <div>
+                <div className="slider">
                     <SpeedIcon />
                     <Slider
                         min={1}
@@ -97,6 +94,7 @@ export class CLK extends React.Component<{}, CLKstate> {
                         arial-label="Speed"
                         aria-valuetext="Hz"
                         onChange={this.updateSpeed} />
+                    <p className="LED">{this.state.v ? on : off}</p>
                 </div>
             </div >
         );
