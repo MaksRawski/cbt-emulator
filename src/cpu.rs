@@ -115,7 +115,8 @@ impl Cpu {
             if (self.ir.data & 0b00111100) >> 2 == 0b1100 {
                 self.alu.cmp(bus, self.ra.data);
             }
-            self.alu.res = match cw {
+            let alu_cw = cw & (ALM | ALE | ALO | AL0 | AL1 | AL2 | AL3 | ALC);
+            self.alu.res = match alu_cw {
                 NOT_A => self.alu.not(bus),
                 A_NOR_B => self.alu.nor(bus, self.ra.data),
                 A_NAND_B => self.alu.nand(bus, self.ra.data),
@@ -192,6 +193,17 @@ mod tests {
     }
 
     #[test]
+    fn test_pc_in_cpu() {
+        let mut cpu = Cpu::new();
+        // nop - mov a, a - 4 steps
+        cpu.load_program(vec![0]);
+        for _ in 0..4 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.pc.lo(), 1);
+    }
+
+    #[test]
     fn test_stores() {
         let mut cpu = Cpu::new();
 
@@ -206,5 +218,17 @@ mod tests {
         let ram = cpu.mem.ram.0;
 
         assert_eq!(ram.get(0), Some(&42u8));
+    }
+    #[test]
+    fn test_alu_ops() {
+        let mut cpu = Cpu::new();
+
+        // mov a, 42
+        // inc a
+        cpu.load_program(vec![0x07, 0x2a, 0xf4, 0x36]);
+        for _ in 0..50 {
+            cpu.tick()
+        }
+        assert_eq!(cpu.ra.o(), 43);
     }
 }
