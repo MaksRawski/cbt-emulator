@@ -1,4 +1,4 @@
-import React from "react"
+import React, { ReactNode } from "react"
 
 export type reactSetter<V> = React.Dispatch<React.SetStateAction<V>>
 export type reactDummySetter<V> = (reactSetter<V> | (() => void));
@@ -49,7 +49,12 @@ export class CPUModule<P> extends React.Component<P, {}> {
 /**
  * Template for creating basic modules
  */
-export class ModuleTemplate extends CPUModule<{ name: string, id?: string }>{
+export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }>{
     name = this.props.name
-    id = this.props.id
+    id = this.props.id || this.props.name
+    children = this.props.children
+
+    module(){
+        return (<div>{this.children} {super.module()}</div>);
+    }
 }

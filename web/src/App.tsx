@@ -10,17 +10,19 @@ const App = () => {
                 <a target="_blank" rel="norefferer" href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
             </header>
             <div className="modules">
-                <div className="left-side">
+                <div className="module-column">
                     <CLK />
-                    <ModuleTemplate name="RAM" />
-                    <ModuleTemplate name="MAR" />
+                    <div className="memory">
+                        <ModuleTemplate name="RAM" />
+                        <ModuleTemplate name="MAR" />
+                    </div>
                     <ModuleTemplate name="IR" />
                     <ModuleTemplate name="µT" id="utime" />
                 </div>
-                <div className='BUS'>
+                <div className="BUS module-column">
                     <ModuleTemplate name="BUS" />
                 </div>
-                <div className="right-side">
+                <div className="module-column">
                     <ModuleTemplate name="PC" />
                     <div className="row">
                         <ModuleTemplate name="RA" />
@@ -35,9 +37,8 @@ const App = () => {
                         <ModuleTemplate name="RD" />
                     </div>
                     <ModuleTemplate name="SP" />
-                    <div className="CW">
-                        <ModuleTemplate name="CW" />
-                    </div>
+                    <ModuleTemplate name="CW" >
+                    </ModuleTemplate>
                 </div>
             </div>
             <div className="footer"></div>

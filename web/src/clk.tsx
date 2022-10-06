@@ -2,6 +2,8 @@ import React from 'react';
 import { cpu } from './cpu';
 import Slider from '@mui/material/Slider';
 import SpeedIcon from '@mui/icons-material/Speed';
+import { Button, IconButton } from '@mui/material';
+import { Pause, PlayArrow } from '@mui/icons-material';
 
 let off = '○';
 let on = '●';
@@ -91,6 +93,7 @@ export class CLK extends React.Component<{}, CLKstate> {
                         defaultValue={4}
                         scale={this.speedScale}
                         valueLabelDisplay="auto"
+                        valueLabelFormat={v => `${v} Hz`}
                         arial-label="Speed"
                         aria-valuetext="Hz"
                         onChange={this.updateSpeed} />
