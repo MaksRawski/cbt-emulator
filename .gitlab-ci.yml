@@ -1,0 +1,43 @@
+image: debian
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: rust
+  before_script:
+    - ls -a
+    - pwd
+    - env
+    - ls /usr/local/cargo
+  script:
+    - cargo build
+  cache:
+    paths:
+      - target/
+      - /usr/local/cargo
+
+test:
+  stage: test
+  image: rust
+  script:
+    - cargo test
+  dependencies:
+    - build
+  when: manual
+
+pages:
+  image: node
+  stage: deploy
+  script:
+    - cd web
+    - npm run build
+    - mkdir pages-tmp
+    - mv build pages-tmp/public
+    - cd pages-tmp
+  artifacts:
+    paths:
+      - public
