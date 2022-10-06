@@ -1,14 +1,16 @@
 image: debian
 
 stages:
-  - build
+  - build:backend
+  - build:frontend
   - test
   - deploy
 
+# templates
 .rust: &rust
   image: rust
   before_script:
-    - stat cargo && mv cargo /usr/local/cargo
+    - &rust-restore-cache stat cargo && mv cargo /usr/local/cargo
   after_script:
     - mv /usr/local/cargo cargo
   cache:
@@ -24,31 +26,58 @@ stages:
     paths:
       - web/node_modules
 
+# building the backend just to have it in cache
 build-rust:
-  stage: build
-  image: rust
+  <<: *rust
+  stage: build:backend
   script:
     - cargo build
-  <<: *rust
 
+# testing the backend the moment it's built
+test-backend:
+  <<: *rust
+  stage: test
+  needs:
+    - build-rust
+  script:
+    - cargo test
+
+# builds wasm package once the backend is built
+build-wasm:
+  <<: *rust
+  stage: build:backend
+  needs:
+    - build-rust
+  before_script:
+    - *rust-restore-cache
+    - wasm-pack --version || cargo install wasm-pack
+  script:
+    - wasm-pack build --target web --out-dir web/pkg
+  artifacts:
+    untracked: false
+    expire_in: "30 days"
+    paths:
+      - web/pkg/
+
+# installs npm dependencies;
+# note: wasm package is also dependency so this job
+# will be run once all wasm stuff is generated
 build-npm:
-  stage: build
-  image: node
+  <<: *node
+  stage: build:frontend
+  needs:
+    - build-wasm
   script:
     - cd web
     - npm install
+
+# creates a production build of the web interface
+# and deploys it to gitlab pages
+deploy-pages:
   <<: *node
-
-test:
-  stage: test
-  image: rust
-  script:
-    - cargo test
-  when: manual
-  <<: *rust
-
-pages:
   stage: deploy
+  needs:
+    - build-npm
   script:
     - cd web
     - npm run build
@@ -57,4 +86,3 @@ pages:
   artifacts:
     paths:
       - public/
-  <<: *node
