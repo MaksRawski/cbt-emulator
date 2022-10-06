@@ -10,7 +10,7 @@ stages:
 .rust: &rust
   image: rust
   before_script:
-    - &rust-restore-cache stat cargo && mv cargo /usr/local/cargo
+    - &rust-restore-cache stat cargo && (rm -r /usr/local/cargo; mv cargo /usr/local/cargo)
   after_script:
     - mv /usr/local/cargo cargo
   cache:
@@ -31,7 +31,7 @@ build-rust:
   <<: *rust
   stage: build:backend
   script:
-    - cargo build
+    - cargo build --release
 
 # testing the backend the moment it's built
 test-backend:
@@ -55,7 +55,7 @@ build-wasm:
     - wasm-pack build --target web --out-dir web/pkg
   artifacts:
     untracked: false
-    expire_in: "30 days"
+    expire_in: "1 day"
     paths:
       - web/pkg/
 
