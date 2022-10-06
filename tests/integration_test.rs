@@ -129,7 +129,7 @@ mod test_programs {
     use super::*;
 
     #[wasm_bindgen_test]
-    // #[test]
+    #[test]
     fn test_hello_world() {
         let mut cpu = Cpu::new();
 

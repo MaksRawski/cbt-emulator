@@ -1,47 +1,48 @@
-import React, { useState } from 'react';
 import './css/App.scss';
 import { CLK } from './clk';
-import { Register } from './register';
-import { reactSetter, CPUModule } from './Modules';
+import { ModuleTemplate } from './Modules';
+import { Flags } from './alu';
 
 const App = () => {
     return (
         <div className="App">
             <header className="App-header">
-                CBT emulator
+                <a target="_blank" rel="norefferer" href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
             </header>
-            <div className="Modules">
-                <div className="Left-side">
+            <div className="modules">
+                <div className="module-column">
                     <CLK />
-                    {/*  wasm_name="RAM"*/}
-                    <CPUModule />
-                    {/*  wasm_name="MAR"*/}
-                    <CPUModule />
-                    <Register wasm_name="ir" />
-                    {/*  wasm_name="µT"*/}
-                    <CPUModule />
+                    <div className="memory">
+                        <ModuleTemplate name="RAM" />
+                        <ModuleTemplate name="MAR" />
+                    </div>
+                    <ModuleTemplate name="IR" />
+                    <ModuleTemplate name="µT" id="utime" />
                 </div>
-                <div className="Right-side">
-                    <CPUModule wasm_name="PC" />
+                <div className="BUS module-column">
+                    <ModuleTemplate name="BUS" />
+                </div>
+                <div className="module-column">
+                    <ModuleTemplate name="PC" />
                     <div className="row">
-                        <Register wasm_name="ra" />
-                        <Register wasm_name="rb" />
+                        <ModuleTemplate name="RA" />
+                        <ModuleTemplate name="RB" />
                     </div>
                     <div className="row">
-                        <CPUModule wasm_name="ALU" />
-                        <Register wasm_name="flags" />
+                        <ModuleTemplate name="ALU" />
+                        <Flags />
                     </div>
                     <div className="row">
-                        <Register wasm_name="rc" />
-                        <Register wasm_name="rd" />
+                        <ModuleTemplate name="RC" />
+                        <ModuleTemplate name="RD" />
                     </div>
-                    <Register wasm_name="sp" />
-                    {/*  wasm_name="CW"*/}
-                    <CPUModule />
+                    <ModuleTemplate name="SP" />
+                    <ModuleTemplate name="CW" >
+                    </ModuleTemplate>
                 </div>
             </div>
             <div className="footer"></div>
-        </div>
+        </div >
     );
 }
 

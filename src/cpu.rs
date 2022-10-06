@@ -1,13 +1,11 @@
-use std::collections::HashMap;
-
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
 
 use crate::alu::ALU;
 use crate::bus::Bus;
 use crate::clock::Clock;
 use crate::cw::*;
 
+use crate::js::update_dom_number;
 use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
@@ -41,19 +39,21 @@ pub struct Cpu {
 #[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Self {
+        update_dom_number("CW", 0, 32);
+        update_dom_number("BUS", 0, 8);
         Self {
             bus: Bus(0),
             clock: Clock::new(),
             ucode: Microcode::load(),
-            ir: Register::new("ir"),
+            ir: Register::new("IR"),
             mem: Memory::new(vec![]),
             pc: ProgramCounter::new(),
 
-            ra: Register::new("ra"),
-            rb: Register::new("rb"),
-            rc: Register::new("rc"),
-            rd: Register::new("rd"),
-            sp: Register::new("sp"),
+            ra: Register::new("RA"),
+            rb: Register::new("RB"),
+            rc: Register::new("RC"),
+            rd: Register::new("RD"),
+            sp: Register::new("SP"),
 
             alu: ALU::new(),
             lcd: Lcd::new(),
@@ -69,6 +69,7 @@ impl Cpu {
             &self.alu.flags.to_byte(),
             &self.clock.utime,
         );
+        update_dom_number("CW", cw, 32);
 
         let bus = match cw {
             cw if (cw & AO > 0) => self.ra.o(),
@@ -85,6 +86,7 @@ impl Cpu {
         };
 
         self.bus.0 = bus.clone();
+        update_dom_number("BUS", self.bus.0.into(), 8);
 
         for i in 0..32 {
             match cw & 1 << i {
@@ -113,7 +115,8 @@ impl Cpu {
             if (self.ir.data & 0b00111100) >> 2 == 0b1100 {
                 self.alu.cmp(bus, self.ra.data);
             }
-            self.alu.res = match cw {
+            let alu_cw = cw & (ALM | ALE | ALO | AL0 | AL1 | AL2 | AL3 | ALC);
+            self.alu.res = match alu_cw {
                 NOT_A => self.alu.not(bus),
                 A_NOR_B => self.alu.nor(bus, self.ra.data),
                 A_NAND_B => self.alu.nand(bus, self.ra.data),
@@ -140,7 +143,11 @@ impl Cpu {
                         self.alu.res
                     }
                 }
-            }
+            };
+            // in the interface display flags normally,
+            // not how microcode wants it
+            update_dom_number("ALU", self.alu.res.into(), 8);
+            update_dom_number("FLAGS", (self.alu.flags.to_byte() ^ 0b11).into(), 4);
         }
 
         if cw & LCE > 0 && cw & LCM > 0 {
@@ -187,6 +194,17 @@ mod tests {
     }
 
     #[test]
+    fn test_pc_in_cpu() {
+        let mut cpu = Cpu::new();
+        // nop - mov a, a - 4 steps
+        cpu.load_program(vec![0]);
+        for _ in 0..4 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.pc.lo(), 1);
+    }
+
+    #[test]
     fn test_stores() {
         let mut cpu = Cpu::new();
 
@@ -201,5 +219,17 @@ mod tests {
         let ram = cpu.mem.ram.0;
 
         assert_eq!(ram.get(0), Some(&42u8));
+    }
+    #[test]
+    fn test_alu_ops() {
+        let mut cpu = Cpu::new();
+
+        // mov a, 42
+        // inc a
+        cpu.load_program(vec![0x07, 0x2a, 0xf4, 0x36]);
+        for _ in 0..50 {
+            cpu.tick()
+        }
+        assert_eq!(cpu.ra.o(), 43);
     }
 }

@@ -2,6 +2,8 @@ use std::num::Wrapping;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
+use crate::js::{update_dom_element, update_dom_number};
+
 #[wasm_bindgen]
 #[derive(Clone, Copy)]
 pub struct Clock {
@@ -12,6 +14,7 @@ pub struct Clock {
 #[wasm_bindgen]
 impl Clock {
     pub fn new() -> Self {
+        update_dom_number("utime", 0, 4);
         Self {
             utime: 0,
             halted: false,
@@ -24,11 +27,14 @@ impl Clock {
             self.utime = (Wrapping(self.utime) + Wrapping(1)).0;
             self.utime &= 0b1111;
         }
+        update_dom_number("utime", self.utime.into(), 4);
     }
     pub fn rst(&mut self) {
         self.utime = u8::MAX;
+        update_dom_number("utime", 0, 4);
     }
     pub fn hlt(&mut self) {
         self.halted = true;
+        update_dom_element("utime", "HALT");
     }
 }

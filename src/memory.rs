@@ -8,6 +8,8 @@
 //! Though accessing it is all up to user.
 //! (put 127 into high address register)
 
+use crate::js::update_dom_number;
+
 pub const RAM_SIZE: u16 = 32768;
 pub const ROM_SIZE: u16 = 32768;
 
@@ -43,14 +45,19 @@ impl Memory {
             return;
         }
         self.ram.0[(self.address - ROM_SIZE) as usize] = v;
+        update_dom_number("RAM", v.into(), 8);
     }
     /// low address in
     pub fn lai(&mut self, a: u8) {
         self.address = a as u16 | (self.address & 0b1111_1111 << 8);
+        update_dom_number("RAM", self.o().into(), 8);
+        update_dom_number("MAR", self.address.into(), 16);
     }
     /// high address in
     pub fn hai(&mut self, a: u8) {
         self.address = (a as u16) << 8 | (self.address & 0b1111_1111);
+        update_dom_number("RAM", self.o().into(), 8);
+        update_dom_number("MAR", self.address.into(), 16);
     }
     pub fn view_rom(&self) -> &Vec<u8> {
         &self.rom.0
@@ -63,6 +70,8 @@ pub struct Rom(Vec<u8>);
 
 impl Ram {
     pub fn new() -> Self {
+        update_dom_number("RAM", 0, 8);
+        update_dom_number("MAR", 0, 16);
         Self(vec![0; RAM_SIZE.into()])
     }
 }

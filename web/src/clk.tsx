@@ -1,5 +1,9 @@
 import React from 'react';
 import { cpu } from './cpu';
+import Slider from '@mui/material/Slider';
+import SpeedIcon from '@mui/icons-material/Speed';
+import { Button, IconButton } from '@mui/material';
+import { Pause, PlayArrow } from '@mui/icons-material';
 
 let off = '○';
 let on = '●';
@@ -51,40 +55,50 @@ export class CLK extends React.Component<{}, CLKstate> {
             this.autoID = setInterval(this.tick, 1000 / this.state.speed);
         }
     }
-    updateSpeed() {
-        // logarithmic slider
-        // https://stackoverflow.com/a/846249
-        let speedRange = document.querySelector("input[name='speed']") as HTMLInputElement;
-        let position = parseInt(speedRange.value);
-        let max = parseInt(speedRange.max);
-        let scale = Math.log(max) / max;
-        let speed = Math.exp(scale * position);
+    updateSpeed(ev: Event, value: number | Array<number>, activeThumb: number) {
+        value = value as number;
+        /* let speedRange = document.querySelector("") as HTMLInputElement; */
+        /* let scale = Math.log(max) / max; */
+        /* let speed = Math.exp(scale * this.state.speed); */
 
-        this.setState({ speed: Math.floor(speed) })
+        this.setState({ speed: this.speedScale(value) })
         clearInterval(this.autoID);
         if (this.state.auto) {
             this.autoID = setInterval(this.tick, 1000 / this.state.speed);
-
         }
+    }
+    /** logarithmic slider: https://stackoverflow.com/a/846249 */
+    speedScale(v: number) {
+        return Math.round(Math.exp(v * Math.log(1000) / 1000));
     }
     render() {
         return (
-            <div>
+            <div className="clock">
                 <div className="clockMode">
-                    <input type="button" disabled={this.state.auto} value="PULSE" onClick={this.tick} />
-                    <label className="checkbox">
-                        <input type="checkbox" name="auto" onClick={this.auto} />
-                        <svg className="checkmark" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox='0 0 32 32'>
-                            <g transform="rotate(180,16,16)">
-                                <polygon points="8,16 32,0 32,32 " />
-                                <rect y="4" width="8" height="24" x="0" />
-                            </g>
-                        </svg>
-                    </label>
+                    <Button variant="contained"
+                        disabled={this.state.auto}
+                        onClick={this.tick}
+                    >PULSE</Button>
+                    <IconButton sx={{ borderRadius: "5px" }} onClick={this.auto}>
+                        <PlayArrow sx={{ fontSize: "1.8em", display: this.state.auto ? "none" : "block" }} />
+                        <Pause sx={{ fontSize: "1.8em", display: !this.state.auto ? "none" : "block", color: "white" }} />
+                    </IconButton>
                 </div>
-                <p className="LED">{this.state.v ? on : off}</p>
-                <input type="range" name="speed" min="0" max="1000" onChange={this.updateSpeed} />
-                <p className="speedValue">{this.state.speed}</p>
+                <div className="slider">
+                    <SpeedIcon />
+                    <Slider
+                        min={1}
+                        step={1}
+                        max={1000}
+                        defaultValue={4}
+                        scale={this.speedScale}
+                        valueLabelDisplay="auto"
+                        valueLabelFormat={v => `${v} Hz`}
+                        arial-label="Speed"
+                        aria-valuetext="Hz"
+                        onChange={this.updateSpeed} />
+                    <p className="LED">{this.state.v ? on : off}</p>
+                </div>
             </div >
         );
     }

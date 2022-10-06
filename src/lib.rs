@@ -1,8 +1,7 @@
 //! # Finally you can play around with CBT on your own!
 //!
-//! This emulator takes real microcode
-//! straight from [CBT's generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
-//! But runs functions instead of activating modules.
+//! This emulator takes real microcode from modified
+//! [CBT's microcode generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
 
 pub mod alu;
 pub mod bus;
