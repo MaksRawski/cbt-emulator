@@ -8,7 +8,7 @@ stages:
 .rust: &rust
   image: rust
   before_script:
-    - mv cargo /usr/local/cargo
+    - stat cargo && mv cargo /usr/local/cargo
   after_script:
     - mv /usr/local/cargo cargo
   cache:
