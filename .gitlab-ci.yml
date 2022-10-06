@@ -1,0 +1,60 @@
+image: debian
+
+stages:
+  - build
+  - test
+  - deploy
+
+.rust: &rust
+  image: rust
+  before_script:
+    - mv cargo /usr/local/cargo
+  after_script:
+    - mv /usr/local/cargo cargo
+  cache:
+    key: rust
+    paths:
+      - target/
+      - cargo/
+
+.node: &node
+  image: node
+  cache:
+    key: npm
+    paths:
+      - web/node_modules
+
+build-rust:
+  stage: build
+  image: rust
+  script:
+    - cargo build
+  <<: *rust
+
+build-npm:
+  stage: build
+  image: node
+  script:
+    - cd web
+    - npm install
+  <<: *node
+
+test:
+  stage: test
+  image: rust
+  script:
+    - cargo test
+  when: manual
+  <<: *rust
+
+pages:
+  stage: deploy
+  script:
+    - cd web
+    - npm run build
+    - mv build ../public
+    - cd ../
+  artifacts:
+    paths:
+      - public/
+  <<: *node
