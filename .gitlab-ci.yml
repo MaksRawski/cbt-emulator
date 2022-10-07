@@ -50,6 +50,7 @@ build-wasm:
     - build-rust
   before_script:
     - *rust-restore-cache
+    - apt-get update && apt-get install -y clang binaryen
     - wasm-pack --version || cargo install wasm-pack
   script:
     - wasm-pack build --target web --out-dir web/pkg
