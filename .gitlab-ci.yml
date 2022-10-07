@@ -35,13 +35,30 @@ build-rust:
     - cargo build --release
 
 # testing the backend the moment it's built
+# and uploading the coverage to codecov using grcov
+# https://github.com/mozilla/grcov#grcov-with-travis
 test-backend:
   <<: *rust
   stage: test
   needs:
     - build-rust
+  before_script:
+    - *rust-restore-cache
+    - rustup component add llvm-tools-preview
+    - curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-x86_64-unknown-linux-gnu.tar.bz2 | tar jxf -
   script:
+    - export RUSTFLAGS="-Cinstrument-coverage"
+    - export LLVM_PROFILE_FILE="tests.profraw"
     - cargo test
+    - ./grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing --ignore "/*" -o lcov.info
+    - bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN} -f lcov.info
+  # artifacts:
+  #   reports:
+  #     coverage_report:
+  #       coverage_format: cobertura
+  #       path: coverage.xml
+  cache:
+    key: codecov
 
 # builds wasm package once the backend is built
 build-wasm:
@@ -80,11 +97,10 @@ build-npm:
 
 # creates a production build of the web interface
 # and deploys it to gitlab pages
-deploy-pages:
+# MUST be run as the last job
+pages:
   <<: *node
   stage: deploy
-  needs:
-    - build-npm
   script:
     - cd web
     - npm run build
@@ -92,4 +108,4 @@ deploy-pages:
     - cd ../
   artifacts:
     paths:
-      - public/
+      - public
