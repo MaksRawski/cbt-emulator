@@ -1,22 +1,23 @@
 [package]
 name = "cbt_emulator"
 version = "0.1.0"
-authors = ["Maks Rawski <maksymilian.rawski@tutanota.com>"]
 edition = "2021"
-license = "MIT"
+authors = ["Maks Rawski <maksymilian.rawski@tutanota.com>"]
+license = "MIT or Apache-2.0"
 
 [lib]
-crate-type = ["cdylib"]
-# crate-type = ["cdylib", "rlib"]
+name = "cbt_emulator"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
 
 [features]
 default = [ "console_error_panic_hook" ]
 
 [dependencies]
-# wasm-bindgen = { version = "0.2.82", features = ["serde-serialize"] }
 wasm-bindgen = { version = "0.2.82" }
-serde = { version = "1.0", features = ["derive"] }
-web-sys = { version = "0.3.44", features = ["console"] }
+js-sys = "0.3.60"
+
+zstd-safe = { version = "5.0.2", default-features = false, features = ["std"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -31,11 +32,21 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 # wee_alloc = { version = "0.4.5", optional = true }
 
-# [dev-dependencies]
-# wasm-bindgen-test = "0.3.13"
-# quickcheck = "0.9"
-# quickcheck_macros = "0.9"
+[dev-dependencies]
+wasm-bindgen-test = "0.3.13"
 
-# [profile.release]
-# # Tell `rustc` to optimize for small code size.
-# opt-level = "s"
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'Document',
+  'Element',
+  'HtmlElement',
+  'Node',
+  'Window',
+]
+# [target.wasm32-unknown-unknown]
+# runner = "wasm-bindgen-test-runner"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
