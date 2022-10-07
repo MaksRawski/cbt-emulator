@@ -25,6 +25,7 @@ stages:
     key: npm
     paths:
       - web/node_modules
+      - web/node_modules
 
 # building the backend just to have it in cache
 build-rust:
@@ -71,6 +72,11 @@ build-npm:
   script:
     - cd web
     - npm install
+  artifacts:
+    untracked: false
+    expire_in: "1 day"
+    paths:
+      - web/pkg/
 
 # creates a production build of the web interface
 # and deploys it to gitlab pages

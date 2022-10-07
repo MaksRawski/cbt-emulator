@@ -7,7 +7,7 @@ const App = () => {
     return (
         <div className="App">
             <header className="App-header">
-                <a target="_blank" rel="norefferer" href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
+                <a href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
             </header>
             <div className="modules">
                 <div className="module-column">
