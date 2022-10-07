@@ -1,4 +1,5 @@
 {
+  "homepage": "cbt-emulator",
   "name": "CBT emulator",
   "version": "0.1.0",
   "private": true,
