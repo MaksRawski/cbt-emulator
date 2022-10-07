@@ -55,6 +55,7 @@ pub struct ALU {
 
 impl ALU {
     pub fn new() -> Self {
+        update_dom_number("ALU", 0, 8);
         Self {
             flags: Flags::new(),
             res: 0,

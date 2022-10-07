@@ -164,7 +164,6 @@ mod test_programs {
         for _ in 0..500 {
             cpu.tick();
         }
-        dbg!(cpu.lcd);
 
         assert_eq!(cpu.lcd.string_content(), Some("Hello world".to_string()));
     }
