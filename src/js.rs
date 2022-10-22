@@ -1,5 +1,7 @@
 use wasm_bindgen::prelude::*;
 
+use crate::cw::CW_LABELS;
+
 pub const OFF: char = '○';
 pub const ON: char = '●';
 
@@ -20,7 +22,7 @@ pub fn update_dom_element(element_id: &str, value: &str) {
     if cfg!(target_family = "wasm") {
         let window = web_sys::window().expect("no global `window` exists");
         let document: web_sys::Document =
-            window.document().expect("should have a document on window");
+            window.document().expect("should have a document in window");
         let _ = document.body().expect("document should have a body");
 
         let el: web_sys::Element = document
@@ -39,6 +41,15 @@ pub fn update_dom_number(element_id: &str, value: u32, width: u8) {
         unsafe {
             console_log!("Set {}'s value to {}", element_id, value)
         };
+    }
+}
+
+pub fn update_cw(cw: u32) {
+    if cfg!(target_family = "wasm") {
+        for i in 0..32 {
+            let value = if (cw & 1 << i) > 0 { ON } else { OFF };
+            update_dom_element(CW_LABELS[i], &value.to_string());
+        }
     }
 }
 

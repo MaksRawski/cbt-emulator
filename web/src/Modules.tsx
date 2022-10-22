@@ -1,19 +1,5 @@
 import React, { ReactNode } from "react"
 
-export type reactSetter<V> = React.Dispatch<React.SetStateAction<V>>
-export type reactDummySetter<V> = (reactSetter<V> | (() => void));
-
-let off = '○';
-let on = '●';
-
-export function to_binary(n: number, width: number): string {
-    let res = "";
-    for (let i = 0; i < width; i++) {
-        res += n & (1 << i) ? on : off;
-    }
-    return res;
-}
-
 /**
    * This class isn't meant to be used directly but to be used as a base for other modules.
    * By default it will create a module which holds just one value with `this.name` as ID.
@@ -26,12 +12,12 @@ export class CPUModule<P> extends React.Component<P, {}> {
     /**
      * Returns a handle for the backend to put binary data in this place.
      */
-    led_num(id: string) {
+    led(id: string) {
         return <div className="LED" id={id}>-</div>
     }
 
     module() {
-        return this.led_num(this.id || this.name);
+        return this.led(this.id || this.name);
     }
 
     render() {

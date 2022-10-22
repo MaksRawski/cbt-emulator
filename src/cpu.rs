@@ -5,7 +5,7 @@ use crate::bus::Bus;
 use crate::clock::Clock;
 use crate::cw::*;
 
-use crate::js::update_dom_number;
+use crate::js::{update_cw, update_dom_number};
 use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
@@ -39,7 +39,7 @@ pub struct Cpu {
 #[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Self {
-        update_dom_number("CW", 0, 32);
+        update_cw(0);
         update_dom_number("BUS", 0, 8);
         Self {
             bus: Bus(0),
@@ -69,7 +69,7 @@ impl Cpu {
             &self.alu.flags.to_byte(),
             &self.clock.utime,
         );
-        update_dom_number("CW", cw, 32);
+        update_cw(cw);
 
         let bus = match cw {
             cw if (cw & AO > 0) => self.ra.o(),

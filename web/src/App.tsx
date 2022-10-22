@@ -2,12 +2,14 @@ import './css/App.scss';
 import { CLK } from './clk';
 import { ModuleTemplate } from './Modules';
 import { Flags } from './alu';
+import { CW } from './cw';
 
 const App = () => {
     return (
         <div className="App">
             <header className="App-header">
-                <a href="https://gitlab.com/MaksRawski/cbt/">CBT</a> emulator
+                <a style={{fontWeight: 600}} href="https://gitlab.com/MaksRawski/cbt/">CBT</a>
+                <a href="https://gitlab.com/MaksRawski/cbt-emulator/"> emulator</a>
             </header>
             <div className="modules">
                 <div className="module-column">
@@ -37,8 +39,7 @@ const App = () => {
                         <ModuleTemplate name="RD" />
                     </div>
                     <ModuleTemplate name="SP" />
-                    <ModuleTemplate name="CW" >
-                    </ModuleTemplate>
+                    <CW />
                 </div>
             </div>
             <div className="footer"></div>
