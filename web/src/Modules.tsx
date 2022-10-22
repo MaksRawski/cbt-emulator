@@ -6,7 +6,7 @@ import React, { ReactNode } from "react"
    *
    * With `module()` you can override the "insides" of a module that is, what will be displayed below the module name.
  */
-export class CPUModule<P> extends React.Component<P, {}> {
+export class CPUModule<P, S> extends React.Component<P, S> {
     name: string = "CPUModule"
     id?: string
     /**
@@ -35,7 +35,7 @@ export class CPUModule<P> extends React.Component<P, {}> {
 /**
  * Template for creating basic modules
  */
-export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }>{
+export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }, {}>{
     name = this.props.name
     id = this.props.id || this.props.name
     children = this.props.children
