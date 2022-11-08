@@ -4,6 +4,16 @@ import { ModuleTemplate } from './Modules';
 import { Flags } from './alu';
 import { CW } from './cw';
 
+declare global{
+    function set_cw(cw: number): void
+}
+
+export function set_cw(cw: number){
+    console.log("not set yet")
+}
+
+global.set_cw = set_cw;
+
 const App = () => {
     return (
         <div className="App">

@@ -1,7 +1,5 @@
 use wasm_bindgen::prelude::*;
 
-use crate::cw::CW_LABELS;
-
 pub const OFF: char = '○';
 pub const ON: char = '●';
 
@@ -11,6 +9,13 @@ extern "C" {
     pub fn log(a: &str);
     #[wasm_bindgen(js_namespace = console)]
     pub fn error(a: &str);
+
+}
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn set_cw(cw: u32);
+
 }
 
 #[macro_export]
@@ -46,10 +51,14 @@ pub fn update_dom_number(element_id: &str, value: u32, width: u8) {
 
 pub fn update_cw(cw: u32) {
     if cfg!(target_family = "wasm") {
-        for i in 0..32 {
-            let value = if (cw & 1 << i) > 0 { ON } else { OFF };
-            update_dom_element(CW_LABELS[i], &value.to_string());
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_cw(cw);
         }
+        // for i in 0..32 {
+        //     let value = if (cw & 1 << i) > 0 { ON } else { OFF };
+        //     update_dom_element(CW_LABELS[i], &value.to_string());
+        // }
     }
 }
 
