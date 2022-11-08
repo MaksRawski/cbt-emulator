@@ -3,9 +3,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::alu::ALU;
 use crate::bus::Bus;
 use crate::clock::Clock;
-use crate::cw::*;
+use crate::{console_log, cw::*};
 
-use crate::js::{update_cw, update_dom_number};
+use crate::js::{log, update_cw, update_dom_number};
 use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
@@ -114,6 +114,8 @@ impl Cpu {
         if cw & ALE > 0 {
             if (self.ir.data & 0b00111100) >> 2 == 0b1100 {
                 self.alu.cmp(bus, self.ra.data);
+                unsafe { console_log!("ALU {:?}", self.alu.flags) }
+                unsafe { console_log!("ALU flags to_byte(): {:?}", self.alu.flags.to_byte()) }
             }
             let alu_cw = cw & (ALM | ALE | ALO | AL0 | AL1 | AL2 | AL3 | ALC);
             self.alu.res = match alu_cw {

@@ -17,6 +17,7 @@ however its integration tests have to be run with `wasm-pack test --node`
 # TODO
 - [x] add labels to each bit of CW
 - [-] fix hello world
+- [ ] setup codecov
 - [ ] make web interface to be a git submodule instead
 - [ ] add LCD module in UI (using react setters)
 - [ ] style for mobile, add a "real view"

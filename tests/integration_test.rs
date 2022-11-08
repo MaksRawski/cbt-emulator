@@ -127,44 +127,61 @@ mod test_lcd {
 #[cfg(test)]
 mod test_programs {
     use super::*;
-
     // #[wasm_bindgen_test]
-    // #[test]
-    // fn test_hello_world() {
-    //     let mut cpu = Cpu::new();
+    #[test]
+    fn test_hello_world() {
+        let mut cpu = Cpu::new();
+        //  0:0 |    0 |          ; main:
+        //  0:0 |    0 | 27 ff    ; mov SP, 0xFF
+        //  2:0 |    2 | 3e 01    ; mov lcdc, 0x1
+        //  4:0 |    4 | 3e 0f    ; mov lcdc, 0xF
+        //  6:0 |    6 | 3e 38    ; mov lcdc, 0x38
+        //  8:0 |    8 | 39 00 18 ; mov cb, [txt]
+        //  b:0 |    b | 07 00    ; mov a, 0
+        //  d:0 |    d |          ; printStr:
+        //  d:0 |    d | 59       ; load d,[cb]
+        //  e:0 |    e | f5       ; inc b
+        //  f:0 |    f | f3       ; cmp a,d
+        // 10:0 |   10 | 2b 00 17 ; jz halt
+        // 13:0 |   13 | 33       ; mov lcd,d
+        // 14:0 |   14 | 2f 00 0d ; jmp printStr
+        // 17:0 |   17 |          ; halt:
+        // 17:0 |   17 | 36       ; hlt
+        // 18:0 |   18 |          ; txt:
+        // 18:0 |   18 | 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 21 00 ; #d "Hello, world!\0"
 
-    //     // main:
-    //     //   ; init lcd
-    //     //   mov lcdc, 0x1      ; clear display
-    //     //   mov lcdc, 0xF      ; display on, cursor on, blinking on
-    //     //   mov lcdc, 0x38     ; function set: 8 bit words, 2 lines
-    //     //
-    //     //   mov cb, [txt] ; cb becomes pointer to txt
-    //     //   mov a, 0 ; mov 0 for comparison with current character
-    //     //
-    //     // printStr:
-    //     //   load d,[cb]
-    //     //   inc b ; move pointer to next character
-    //     //
-    //     //   cmp a,d
-    //     //   jz halt
-    //     //
-    //     //   mov lcd,d
-    //     //   jmp printStr
-    //     //
-    //     // halt:
-    //     //   hlt
-    //     // txt: #d "Hello, world!\0"
-    //     let hello_world = [
-    //         0x3e, 0x01, 0x3e, 0x0f, 0x3e, 0x38, 0x39, 0x00, 0x16, 0x07, 0x00, 0x59, 0xf5, 0xf3,
-    //         0x2b, 0x00, 0x15, 0x33, 0x2f, 0x00, 0x0b, 0x36, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c,
-    //         0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x00,
-    //     ];
-    //     cpu.load_program(Vec::from(hello_world));
-    //     for _ in 0..500 {
-    //         cpu.tick();
-    //     }
+        // main:
+        //   ; init lcd
+        //   mov lcdc, 0x1      ; clear display
+        //   mov lcdc, 0xF      ; display on, cursor on, blinking on
+        //   mov lcdc, 0x38     ; function set: 8 bit words, 2 lines
+        //
+        //   mov cb, [txt] ; cb becomes pointer to txt
+        //   mov a, 0 ; mov 0 for comparison with current character
+        //
+        // printStr:
+        //   load d,[cb]
+        //   inc b ; move pointer to next character
+        //
+        //   cmp a,d
+        //   jz halt
+        //
+        //   mov lcd,d
+        //   jmp printStr
+        //
+        // halt:
+        //   hlt
+        // txt: #d "Hello, world!\0"
+        let hello_world = [
+            0x3e, 0x01, 0x3e, 0x0f, 0x3e, 0x38, 0x39, 0x00, 0x16, 0x07, 0x00, 0x59, 0xf5, 0xf3,
+            0x2b, 0x00, 0x15, 0x33, 0x2f, 0x00, 0x0b, 0x36, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c,
+            0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x00,
+        ];
+        cpu.load_program(Vec::from(hello_world));
+        for _ in 0..500 {
+            cpu.tick();
+        }
 
-    //     assert_eq!(cpu.lcd.string_content(), Some("Hello world".to_string()));
-    // }
+        assert_eq!(cpu.lcd.string_content(), Some("Hello world".to_string()));
+    }
 }
