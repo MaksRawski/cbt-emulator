@@ -15,19 +15,23 @@ however its integration tests have to be run with `wasm-pack test --node`
 
 
 # TODO
+## functionality
 - [x] add labels to each bit of CW
-- [-] fix hello world
-- [ ] setup codecov
-- [ ] make web interface to be a git submodule instead
+- [X] fix hello world
 - [ ] add LCD module in UI (using react setters)
+- [ ] disable CLK when in HLT
+- [ ] add a way of previewing what's in ram
+- [ ] add a way to set up custom interrupts, which key on the keyboard would trigger which routine in _interrupt space_
+- [ ] ability to set custom programs after clicking on ROM module
+
+## aesthetics
 - [ ] style for mobile, add a "real view"
 - [ ] add tooltips
 - [ ] improve clock module's controls
-- [ ] add a way of previewing what's in ram
-- [ ] disable CLK when in HLT
-- [ ] ability to set custom programs after clicking on ROM module
-- [ ] add a way to set up custom interrupts, which key on the keyboard would trigger which routine in _interrupt space_
 
+## extra
+- [ ] setup codecov
+- [ ] make web interface to be a git submodule instead
 
 ## changing state
 try to use [this](https://stackoverflow.com/a/31869669) somehow
