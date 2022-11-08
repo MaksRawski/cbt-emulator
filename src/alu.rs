@@ -1,8 +1,10 @@
 use std::num::Wrapping;
 
-use crate::js::update_dom_number;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+use crate::js::{update_dom_number, update_flags};
+
+#[derive(Debug, Serialize, Deserialize)]
 /// c - Carry flag
 /// h - Half-Carry flag
 /// o - Overflow flag
@@ -29,13 +31,14 @@ pub struct Flags {
 
 impl Flags {
     pub fn new() -> Self {
-        update_dom_number("FLAGS", 0, 4);
-        Self {
+        let flags = Self {
             c: false,
             h: false,
             o: false,
             z: false,
-        }
+        };
+        update_flags(&flags).unwrap();
+        flags
     }
     pub fn to_byte(&self) -> u8 {
         let c = !self.c as u8;

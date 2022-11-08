@@ -1,5 +1,7 @@
 use wasm_bindgen::prelude::*;
 
+use crate::alu::Flags;
+
 pub const OFF: char = '○';
 pub const ON: char = '●';
 
@@ -15,6 +17,8 @@ extern "C" {
 #[wasm_bindgen]
 extern "C" {
     pub fn set_cw(cw: u32);
+
+    pub fn set_flags(flags: JsValue);
 
 }
 
@@ -60,6 +64,14 @@ pub fn update_cw(cw: u32) {
         //     update_dom_element(CW_LABELS[i], &value.to_string());
         // }
     }
+}
+
+pub fn update_flags(flags: &Flags) -> Result<(), JsValue> {
+    #[allow(unused_unsafe)]
+    unsafe {
+        set_flags(serde_wasm_bindgen::to_value(flags)?);
+    }
+    Ok(())
 }
 
 fn to_binary_chars(num: u32, width: u8) -> String {

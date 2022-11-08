@@ -4,11 +4,16 @@ import { ModuleTemplate } from './Modules';
 import { Flags } from './alu';
 import { CW } from './cw';
 
+// TODO ideally we would want to move these global setters somewhere else
 declare global{
     function set_cw(cw: number): void
+    function set_flags(flags: {c: boolean, h: boolean, o: boolean, z: boolean}): void
 }
 
 export function set_cw(cw: number){
+    console.log("not set yet")
+}
+export function set_flags(cw: number){
     console.log("not set yet")
 }
 
