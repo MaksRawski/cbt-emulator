@@ -67,9 +67,11 @@ pub fn update_cw(cw: u32) {
 }
 
 pub fn update_flags(flags: &Flags) -> Result<(), JsValue> {
-    #[allow(unused_unsafe)]
-    unsafe {
-        set_flags(serde_wasm_bindgen::to_value(flags)?);
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_flags(serde_wasm_bindgen::to_value(flags)?);
+        }
     }
     Ok(())
 }
