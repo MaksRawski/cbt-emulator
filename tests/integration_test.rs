@@ -1,7 +1,6 @@
 // https://rustwasm.github.io/wasm-bindgen/wasm-bindgen-test/usage.html
 
 use cbt_emulator::cpu::Cpu;
-use wasm_bindgen_test::*;
 
 #[cfg(test)]
 mod test_instructions {
