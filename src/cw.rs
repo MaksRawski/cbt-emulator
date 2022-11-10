@@ -1,3 +1,9 @@
+pub const CW_LABELS: [&str; 32] = [
+    "HLT", "LAI", "HAI", "MO", "II", "MI", "SR", "LPO", "LPI", "HPO", "PCC", "HPI", "AO", "AI",
+    "CO", "CI", "AL3", "AL2", "AL1", "AL0", "ALO", "ALE", "ALM", "ALC", "BO", "BI", "DO", "DI",
+    "LCM", "LCE", "SPO", "SPI",
+];
+
 pub const HLT: u32 = 1 << 0;
 pub const LAI: u32 = 1 << 1;
 pub const HAI: u32 = 1 << 2;
@@ -52,3 +58,20 @@ pub const CMP_A_B: u32 = ALM | ALC | AL2 | AL1 | ALE;
 pub const INC_A: u32 = ALM | ALC | ALE;
 pub const DEC_A: u32 = ALM | AL3 | AL2 | AL1 | AL0 | ALE;
 pub const SHL_A: u32 = ALM | AL3 | AL2 | ALE;
+
+/// Converts control word value into a collection of
+/// labels which correspond to each control bit set.
+pub fn cw_to_labels(cw: u32) -> Vec<&'static str> {
+    let mut res = Vec::new();
+    for i in 0..32 {
+        if (cw & 1 << i) > 0 {
+            res.push(CW_LABELS[i])
+        }
+    }
+    res
+}
+
+#[test]
+fn test_cw_to_labels() {
+    assert_eq!(cw_to_labels(LPO | LAI | PCC), vec!["LAI", "LPO", "PCC"]);
+}

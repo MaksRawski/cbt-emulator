@@ -9,6 +9,7 @@ pub mod clock;
 pub mod cpu;
 #[allow(dead_code)]
 pub mod cw;
+#[macro_use]
 pub mod js;
 pub mod lcd;
 pub mod memory;

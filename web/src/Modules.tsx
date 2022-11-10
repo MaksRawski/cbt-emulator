@@ -1,40 +1,26 @@
 import React, { ReactNode } from "react"
 
-export type reactSetter<V> = React.Dispatch<React.SetStateAction<V>>
-export type reactDummySetter<V> = (reactSetter<V> | (() => void));
-
-let off = '○';
-let on = '●';
-
-export function to_binary(n: number, width: number): string {
-    let res = "";
-    for (let i = 0; i < width; i++) {
-        res += n & (1 << i) ? on : off;
-    }
-    return res;
-}
-
 /**
    * This class isn't meant to be used directly but to be used as a base for other modules.
    * By default it will create a module which holds just one value with `this.name` as ID.
    *
    * With `module()` you can override the "insides" of a module that is, what will be displayed below the module name.
  */
-export class CPUModule<P> extends React.Component<P, {}> {
+export class CPUModule<P, S> extends React.Component<P, S> {
     name: string = "CPUModule"
     id?: string
     /**
      * Returns a handle for the backend to put binary data in this place.
      */
-    led_num(id: string) {
+    led(id: string): ReactNode {
         return <div className="LED" id={id}>-</div>
     }
 
-    module() {
-        return this.led_num(this.id || this.name);
+    module(): ReactNode {
+        return this.led(this.id || this.name);
     }
 
-    render() {
+    render(): ReactNode {
         return (
             <div className="module">
                 <h2 className="module-header">{this.name}</h2>
@@ -49,7 +35,7 @@ export class CPUModule<P> extends React.Component<P, {}> {
 /**
  * Template for creating basic modules
  */
-export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }>{
+export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }, {}>{
     name = this.props.name
     id = this.props.id || this.props.name
     children = this.props.children

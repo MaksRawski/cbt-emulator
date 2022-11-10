@@ -1,5 +1,8 @@
 image: debian
 
+variables:
+  PUBLIC_URL: "/cbt-emulator"
+
 stages:
   - build:backend
   - build:frontend
@@ -46,12 +49,16 @@ test-backend:
     - *rust-restore-cache
     - rustup component add llvm-tools-preview
     - curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-x86_64-unknown-linux-gnu.tar.bz2 | tar jxf -
+    - curl -Os https://uploader.codecov.io/latest/linux/codecov
+    - chmod +x codecov
   script:
+    # TODO data is empty?
+    # https://app.codecov.io/gitlab/MaksRawski/cbt-emulator/tree/develop
     - export RUSTFLAGS="-Cinstrument-coverage"
     - export LLVM_PROFILE_FILE="tests.profraw"
     - cargo test
     - ./grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing --ignore "/*" -o lcov.info
-    - bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN} -f lcov.info
+    - ./codecov -t ${CODECOV_TOKEN} -f lcov.info
   # artifacts:
   #   reports:
   #     coverage_report:
@@ -59,6 +66,9 @@ test-backend:
   #       path: coverage.xml
   cache:
     key: codecov
+    paths:
+      - cargo/
+      - target/
 
 # builds wasm package once the backend is built
 build-wasm:

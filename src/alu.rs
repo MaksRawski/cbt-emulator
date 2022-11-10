@@ -1,8 +1,10 @@
 use std::num::Wrapping;
 
-use crate::js::update_dom_number;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+use crate::js::{update_dom_number, update_flags};
+
+#[derive(Debug, Serialize, Deserialize)]
 /// c - Carry flag
 /// h - Half-Carry flag
 /// o - Overflow flag
@@ -29,21 +31,22 @@ pub struct Flags {
 
 impl Flags {
     pub fn new() -> Self {
-        update_dom_number("FLAGS", 0, 4);
-        Self {
+        let flags = Self {
             c: false,
             h: false,
             o: false,
             z: false,
-        }
+        };
+        update_flags(&flags).unwrap();
+        flags
     }
     pub fn to_byte(&self) -> u8 {
-        let c = self.c as u8;
-        let h = self.h as u8;
+        let c = !self.c as u8;
+        let h = !self.h as u8;
         let o = self.o as u8;
         let z = self.z as u8;
 
-        !c | !h << 1 | o << 2 | z << 3
+        c | h << 1 | o << 2 | z << 3
     }
 }
 
@@ -216,6 +219,33 @@ mod test_adding {
 #[cfg(test)]
 mod test_subtracting {
     use super::*;
+    #[test]
+    fn test_flags_to_byte() {
+        let mut alu = ALU::new();
+        alu.flags.c = true;
+        alu.flags.h = true;
+        alu.flags.o = false;
+        alu.flags.z = false;
+        assert_eq!(alu.flags.to_byte(), 0);
+
+        alu.flags.c = false;
+        alu.flags.h = false;
+        alu.flags.o = true;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 15);
+
+        alu.flags.c = true;
+        alu.flags.h = false;
+        alu.flags.o = true;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 14);
+
+        alu.flags.c = true;
+        alu.flags.h = true;
+        alu.flags.o = false;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 8);
+    }
     #[test]
     fn test_no_flags() {
         let mut alu = ALU::new();

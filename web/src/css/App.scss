@@ -1,13 +1,21 @@
+// file for general styling
+
 @import './vars';
 @import './elements';
 
 body{
   background-color: $bg;
 }
+
 .App {
   min-height: 100vh;
   min-width: 100vw;
   color: $font;
+}
+
+a{
+  color: $font;
+  text-decoration: none;
 }
 
 .App-header {

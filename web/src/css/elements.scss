@@ -1,9 +1,6 @@
+// file for styling specific elements
+
 @import './vars';
-a{
-  color: $font;
-  text-decoration: none;
-  font-weight: 600;
-}
 
 .clock{
   display: flex;
@@ -44,4 +41,55 @@ div.BUS{
   border: 3px solid $fg;
   border-radius: 10px;
   padding: 5px;
+}
+
+.flags{
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.flags-label{
+  position: absolute;
+  font-size: 1.3em;
+  top: 1.5em;
+  left: 0;
+  right: 0;
+
+}
+
+#CW{
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.cb{
+  position: relative;
+}
+.cb-label{
+  font-size: 1em;
+  display: block;
+  position: absolute;
+  top: 1.9em;
+  left: 0;
+  right: 0;
+}
+
+.LCD{
+  border: 0.4em solid #1F562F;
+  border-radius: 2px;
+  background: #059EFC;
+  text-align: center;
+}
+
+.LCD-row{
+  margin-left: 0.6em;
+  margin-right: 0.6em;
+  margin-bottom: 0.2em;
+  height: 1.1em;
+  // width: 4em;
+
+  font-size: 1.5em;
+  text-align: left;
+  font-family: "LCD dot matrix", "monospace";
+  color: white;
 }

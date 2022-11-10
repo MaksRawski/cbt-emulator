@@ -1,5 +1,7 @@
 use wasm_bindgen::prelude::*;
 
+use crate::{alu::Flags, lcd::Lcd};
+
 pub const OFF: char = '○';
 pub const ON: char = '●';
 
@@ -9,6 +11,15 @@ extern "C" {
     pub fn log(a: &str);
     #[wasm_bindgen(js_namespace = console)]
     pub fn error(a: &str);
+
+}
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn set_cw(cw: u32);
+    pub fn set_flags(flags: JsValue);
+    pub fn set_lcd(flags: JsValue);
+
 }
 
 #[macro_export]
@@ -20,7 +31,7 @@ pub fn update_dom_element(element_id: &str, value: &str) {
     if cfg!(target_family = "wasm") {
         let window = web_sys::window().expect("no global `window` exists");
         let document: web_sys::Document =
-            window.document().expect("should have a document on window");
+            window.document().expect("should have a document in window");
         let _ = document.body().expect("document should have a body");
 
         let el: web_sys::Element = document
@@ -40,6 +51,34 @@ pub fn update_dom_number(element_id: &str, value: u32, width: u8) {
             console_log!("Set {}'s value to {}", element_id, value)
         };
     }
+}
+
+pub fn update_cw(cw: u32) {
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_cw(cw);
+        }
+    }
+}
+
+pub fn update_lcd(lcd: &Lcd) -> Result<(), JsValue> {
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_lcd(serde_wasm_bindgen::to_value(lcd)?);
+        }
+    }
+    Ok(())
+}
+pub fn update_flags(flags: &Flags) -> Result<(), JsValue> {
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_flags(serde_wasm_bindgen::to_value(flags)?);
+        }
+    }
+    Ok(())
 }
 
 fn to_binary_chars(num: u32, width: u8) -> String {

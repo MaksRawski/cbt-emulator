@@ -5,7 +5,7 @@ use crate::bus::Bus;
 use crate::clock::Clock;
 use crate::cw::*;
 
-use crate::js::update_dom_number;
+use crate::js::{update_cw, update_dom_number, update_flags};
 use crate::lcd::Lcd;
 use crate::memory::Memory;
 use crate::microcode::Microcode;
@@ -14,10 +14,9 @@ use crate::reg::Register;
 
 #[wasm_bindgen]
 pub struct Cpu {
-    pub bus: Bus,
-    pub clock: Clock,
-    pub pc: ProgramCounter,
-    pub lcd: Lcd,
+    bus: Bus,
+    clock: Clock,
+    pc: ProgramCounter,
     alu: ALU,
     mem: Memory,
     ucode: Microcode,
@@ -34,12 +33,15 @@ pub struct Cpu {
     pub rd: Register,
     #[wasm_bindgen(skip)]
     pub sp: Register,
+
+    #[wasm_bindgen(skip)]
+    pub lcd: Lcd,
 }
 
 #[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Self {
-        update_dom_number("CW", 0, 32);
+        update_cw(0);
         update_dom_number("BUS", 0, 8);
         Self {
             bus: Bus(0),
@@ -69,7 +71,7 @@ impl Cpu {
             &self.alu.flags.to_byte(),
             &self.clock.utime,
         );
-        update_dom_number("CW", cw, 32);
+        update_cw(cw);
 
         let bus = match cw {
             cw if (cw & AO > 0) => self.ra.o(),
@@ -147,7 +149,7 @@ impl Cpu {
             // in the interface display flags normally,
             // not how microcode wants it
             update_dom_number("ALU", self.alu.res.into(), 8);
-            update_dom_number("FLAGS", (self.alu.flags.to_byte() ^ 0b11).into(), 4);
+            update_flags(&self.alu.flags).unwrap();
         }
 
         if cw & LCE > 0 && cw & LCM > 0 {

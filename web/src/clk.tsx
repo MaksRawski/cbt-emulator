@@ -34,17 +34,11 @@ export class CLK extends React.Component<{}, CLKstate> {
     tick() {
         if (this.state.v === true) return
         cpu.tick();
-        /* console.log("[%d.%d] instruction: %d, bus: %d", cpu.pc.lo(), cpu.clock.utime, cpu.ir[0], cpu.bus[0]); */
         this.setState({ v: true });
 
         setTimeout(() => {
             this.setState({ v: false });
         }, 1000 / this.state.speed);
-
-        if (cpu.pc.lo() === 38) {
-            console.log("done!");
-            console.log("LCD: ", cpu.lcd.content());
-        }
     }
     auto() {
         if (this.state.auto) {
