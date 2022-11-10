@@ -1,5 +1,8 @@
 image: debian
 
+variables:
+  PUBLIC_URL: "/cbt-emulator"
+
 stages:
   - build:backend
   - build:frontend

@@ -1,6 +1,7 @@
 # CBT emulator
 
 [CBT](https://gitlab.com/MaksRawski/cbt/) emulator written in rust compiled to webassembly with an interface in react.
+
 Available to play with at: https://maksrawski.gitlab.io/cbt-emulator/.
 
 ## Microcode
@@ -14,8 +15,12 @@ This way instead of throwing over 256KB into a binary we put just a bit shy (pun
 Unit tests for the emulator itself are available to run via `cargo test`, 
 however its integration tests have to be run with `wasm-pack test --node`
 
+# Acknowledgments 
+- ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
+was used for the LCD's font.
 
 # TODO
+
 ## functionality
 - [x] add labels to each bit of CW
 - [X] fix hello world
@@ -32,12 +37,5 @@ however its integration tests have to be run with `wasm-pack test --node`
 - [ ] cw module should be toggleable
 
 ## extra
+- [ ] fix CI's caching
 - [ ] setup codecov
-- [ ] make web interface to be a git submodule instead
-
-## changing state
-try to use [this](https://stackoverflow.com/a/31869669) somehow
-
-# Acknowledgments 
-- ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
-was used for the LCD's font.
