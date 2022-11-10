@@ -5,13 +5,14 @@ import { CPUModule } from "./Modules";
 interface Cursor {
     visible: boolean,
     blinking: boolean
-    position: number,
+    row: number,
+    column: number
 }
 
 interface Display {
     on: boolean,
     two_line_mode: boolean,
-    chars: Uint8Array,
+    buffer: Uint8Array,
 }
 
 export interface LCDState {
@@ -27,12 +28,13 @@ export class LCD extends CPUModule<{}, LCDState>{
             cursor: {
                 visible: false,
                 blinking: false,
-                position: 0,
+                row: 0,
+                column: 0,
             },
             display: {
                 on: false,
                 two_line_mode: false,
-                chars: new Uint8Array(80),
+                buffer: new Uint8Array(80),
             }
         };
     }
@@ -41,10 +43,17 @@ export class LCD extends CPUModule<{}, LCDState>{
             this.setState(v);
         }
     }
+    content(min_range: number, max_range: number): string {
+        let s = "";
+        for (let i = min_range; i < max_range; i++) {
+            s += String.fromCharCode(this.state.display.buffer[i]);
+        }
+        return s;
+    }
     module() {
         return <div className="LCD">
-            <div className="LCD-row"></div>
-            <div className="LCD-row"></div>
+            <div className="LCD-row">{this.content(0, 16)}</div>
+            <div className="LCD-row">{this.content(40, 56)}</div>
         </div>
     }
 }

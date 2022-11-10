@@ -18,7 +18,7 @@ export function set_cw(){
 export function set_flags(){
     console.log("not set yet")
 }
-export function update_display(){
+export function set_lcd(){
     console.log("not set yet")
 }
 

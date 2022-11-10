@@ -18,7 +18,7 @@ extern "C" {
 extern "C" {
     pub fn set_cw(cw: u32);
     pub fn set_flags(flags: JsValue);
-    pub fn set_display(flags: JsValue);
+    pub fn set_lcd(flags: JsValue);
 
 }
 
@@ -66,7 +66,7 @@ pub fn update_lcd(lcd: &Lcd) -> Result<(), JsValue> {
     if cfg!(target_family = "wasm") {
         #[allow(unused_unsafe)]
         unsafe {
-            set_display(serde_wasm_bindgen::to_value(lcd)?);
+            set_lcd(serde_wasm_bindgen::to_value(lcd)?);
         }
     }
     Ok(())
