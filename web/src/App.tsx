@@ -54,6 +54,7 @@ const App = () => {
                         <ModuleTemplate name="RD" />
                     </div>
                     <ModuleTemplate name="SP" />
+                    <LCD />
                     <CW />
                 </div>
             </div>

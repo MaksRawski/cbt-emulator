@@ -27,7 +27,11 @@ however its integration tests have to be run with `wasm-pack test --node`
 - [ ] disable CLK when in HLT
 - [ ] ability to set custom programs after clicking on ROM module
 - [ ] add a way to set up custom interrupts, which key on the keyboard would trigger which routine in _interrupt space_
-
+- [ ] cw module should be toggleable
 
 ## changing state
 try to use [this](https://stackoverflow.com/a/31869669) somehow
+
+# Acknowledgments 
+- ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
+was used for the LCD's font.
