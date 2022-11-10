@@ -1,18 +1,21 @@
-//! Communication layer between modules.
-//!
-//! It includes two seperate buses for data and addresses
-//! in comparison to real CBT which has to share single bus for both cases.
-use std::num::Wrapping;
-pub use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::wasm_bindgen;
 
-/// 8 Bit data bus
-pub trait DataBus {
-    fn get(&self) -> Wrapping<u8>;
-    fn set(&mut self, new_value: u8);
-}
+#[wasm_bindgen]
+#[derive(Clone, Copy, Debug)]
+pub struct Bus(pub u8);
 
-/// 16 Bit address bus
-pub trait AddressBus {
-    fn get(&self) -> Wrapping<u16>;
-    fn set(&mut self, new_value: u16);
-}
+// impl BUS {
+//     pub async fn get(&self) -> u8 {
+//         self.0
+//     }
+//     pub fn put(&mut self, v: u8) {
+//         self.0 = v;
+//     }
+// }
+
+// pub trait Bus {
+//     type Output: Future<Output = ()>;
+
+//     fn i(&mut self, bus: &BUS) -> Self::Output;
+//     fn o(&self, bus: &mut BUS) -> Self::Output;
+// }

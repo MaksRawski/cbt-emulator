@@ -1,26 +1,40 @@
-//! Goes tik-tok.
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
+use std::num::Wrapping;
+
+use wasm_bindgen::prelude::wasm_bindgen;
+
+use crate::js::{update_dom_element, update_dom_number};
 
 #[wasm_bindgen]
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Clone, Copy)]
 pub struct Clock {
-    pub state: bool,
+    pub utime: u8,
+    pub halted: bool,
 }
 
 #[wasm_bindgen]
 impl Clock {
-    #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        Self { state: false }
+        update_dom_number("utime", 0, 4);
+        Self {
+            utime: 0,
+            halted: false,
+        }
     }
-    /// One clock pulse is two ticks.
+    /// utime will overflow if it reaches 16
+    /// setting SR bit is preffered way of resetting it
     pub fn tick(&mut self) {
-        self.state = !self.state;
+        if !self.halted {
+            self.utime = (Wrapping(self.utime) + Wrapping(1)).0;
+            self.utime &= 0b1111;
+        }
+        update_dom_number("utime", self.utime.into(), 4);
     }
-    #[wasm_bindgen(getter)]
-    pub fn get_state(&self) -> bool {
-        self.state
+    pub fn rst(&mut self) {
+        self.utime = u8::MAX;
+        update_dom_number("utime", 0, 4);
+    }
+    pub fn hlt(&mut self) {
+        self.halted = true;
+        update_dom_element("utime", "HALT");
     }
 }
-

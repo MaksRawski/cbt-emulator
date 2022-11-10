@@ -1,247 +1,326 @@
-//! Arithmetic logic unit.
-use crate::bus::DataBus;
-use crate::reg::Register;
+use std::num::Wrapping;
+
 use serde::{Deserialize, Serialize};
 
-// #[cfg(test)]
-// use quickcheck::{Arbitrary, Gen};
-use std::num::Wrapping;
-use wasm_bindgen::prelude::*;
+use crate::js::{update_dom_number, update_flags};
 
-#[wasm_bindgen]
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub struct Alu {
-    // only contains flags as its internal state
-    flags: [bool; 4],
+#[derive(Debug, Serialize, Deserialize)]
+/// c - Carry flag
+/// h - Half-Carry flag
+/// o - Overflow flag
+/// z - Zero flag
+/// To view a more detailed description of each flag, look instead directly for it as a property inside this struct.
+pub struct Flags {
+    /// C (carry) flag:
+    /// set to true if unsigned addition overflowed
+    /// set to false if there was a borrow in unsigned subtraction
+    pub c: bool,
+    /// H (half-carry) flag:
+    /// set to true if unsigned addition overflowed out of 4 least significant bits
+    /// set to false if there was a borrow from the 5th bit in unsigned subtraction
+    pub h: bool,
+    /// O (overflow) flag:
+    /// set if signed addition or subtraction overflowed (7th bits overflowed to the 8th one)
+    /// set to false otherwise
+    pub o: bool,
+    /// Z (zero) flag:
+    /// is set if result of addition is zero
+    /// set to false otherwise
+    pub z: bool,
 }
 
-impl Alu {
+impl Flags {
     pub fn new() -> Self {
-        let flags = [false; 4];
-        Self { flags }
+        let flags = Self {
+            c: false,
+            h: false,
+            o: false,
+            z: false,
+        };
+        update_flags(&flags).unwrap();
+        flags
     }
+    pub fn to_byte(&self) -> u8 {
+        let c = !self.c as u8;
+        let h = !self.h as u8;
+        let o = self.o as u8;
+        let z = self.z as u8;
 
-    fn get_index(&self, flag: char) -> usize {
-        match flag {
-            'c' => 0,
-            'n' => 1,
-            'o' => 2,
-            'z' => 3,
-            _ => panic!("Tried to use non existent flag"),
-        }
-    }
-
-    /// # Panics
-    /// When trying to use non existent flag.
-    pub fn set_flag(&mut self, flag: char, value: bool) {
-        // 3     2          1        0
-        // c     n          o        z
-        // carry negtive    overflow zero
-        self.flags[self.get_index(flag)] = value;
-    }
-
-    /// # Panics
-    /// When trying to use non existent flag.
-    pub fn get_flag(&self, flag: char) -> bool {
-        self.flags[self.get_index(flag)]
+        c | h << 1 | o << 2 | z << 3
     }
 }
 
-/// argument A needs to get &Register A
-/// argument B is the chosen &Register
-impl Alu {
-    pub fn not(&mut self, b: &Register) -> Wrapping<u8> {
-        !b.get()
-    }
-    pub fn nor(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        !(a.get() | b.get())
-    }
-    pub fn nand(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        !(a.get() & b.get())
-    }
-    pub fn xor(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        a.get() ^ b.get()
-    }
-    pub fn xnor(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        !(a.get() ^ b.get())
-    }
-    pub fn and(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        a.get() & b.get()
-    }
-    pub fn or(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        a.get() | b.get()
-    }
+/// Arithmetic Logic Unit.
+pub struct ALU {
+    pub flags: Flags,
+    pub res: u8,
+}
 
-    pub fn add(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        let sum = a.get() + b.get();
-        let non_wrapping_sum = (a.get().0) as u16 + (b.get().0) as u16;
-
-        // overflow flag is set when signed addition overflows
-        // that happens when msb of a and msb of b are the same
-        // but msb of result is diffrent
-        let mut overflow = false;
-        let msb_a = a.get().0 >> 7;
-        let msb_b = b.get().0 >> 7;
-        if (msb_a == msb_b) && ((msb_a & msb_b) != sum.0 >> 7) {
-            overflow = true;
+impl ALU {
+    pub fn new() -> Self {
+        update_dom_number("ALU", 0, 8);
+        Self {
+            flags: Flags::new(),
+            res: 0,
         }
-
-        self.set_flag('c', non_wrapping_sum > 255);
-        self.set_flag('n', sum & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', sum == Wrapping(0u8));
-
-        sum
-    }
-    pub fn adc(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        let sum = a.get() + b.get() + Wrapping(self.get_flag('c') as u8);
-        let non_wrapping_sum = (a.get().0) as u16 + (b.get().0) as u16 + self.get_flag('c') as u16;
-
-        // overflow flag is set when signed addition overflows
-        // that happens when msb of a and msb of b are the same
-        // but msb of result is diffrent
-        let mut overflow = false;
-        let msb_a = a.get().0 + self.get_flag('c') as u8 & 1 << 7;
-        let msb_b = b.get().0 >> 7;
-        if (msb_a == msb_b) && ((msb_a & msb_b) != sum.0 & 1 << 7) {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum > 255);
-        self.set_flag('n', sum & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', sum == Wrapping(0u8));
-
-        sum
-    }
-    pub fn sub(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        let diffrence = b.get() - a.get();
-        let non_wrapping_sum = (b.get().0) as i16 - (a.get().0) as i16;
-
-        // overflow flag is set when signed subtraction overflows
-        // that happens when inverse of msb of a and msb of b are diffrent
-        // but msb of result is diffrent than `or` of them
-        let mut overflow = false;
-        let msb_a = !a.get().0 >> 7;
-        let msb_b = b.get().0 >> 7;
-        if (msb_a != msb_b) && ((msb_a | msb_b) != diffrence.0 & 1 << 7) {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum >= 0);
-        self.set_flag('n', diffrence & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', diffrence == Wrapping(0u8));
-
-        diffrence
-    }
-    pub fn sbc(&mut self, a: &Register, b: &Register) -> Wrapping<u8> {
-        let diffrence = b.get() - a.get() - Wrapping(!self.get_flag('c') as u8);
-        let non_wrapping_sum = (b.get().0) as i8 - (a.get().0) as i8 - !self.get_flag('c') as i8;
-
-        // overflow flag is set when signed subtraction overflows
-        // that happens when inverse of msb of a and msb of b are diffrent
-        // but msb of result is diffrent than `or` of them
-        let mut overflow = false;
-        let msb_a = !(a.get().0 - !self.get_flag('c') as u8) & 1 << 7;
-        let msb_b = b.get().0 & 1 << 7;
-        if (msb_a != msb_b) && ((msb_a | msb_b) != diffrence.0 & 1 << 7) {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum >= 0);
-        self.set_flag('n', diffrence & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', diffrence == Wrapping(0u8));
-
-        diffrence
-    }
-    pub fn cmp(&mut self, a: &Register, b: &Register) {
-        let diffrence = b.get() - a.get();
-        let non_wrapping_sum = (b.get().0) as i8 - (a.get().0) as i8;
-
-        // overflow flag is set when signed subtraction overflows
-        // that happens when inverse of msb of a and msb of b are diffrent
-        // but msb of result is diffrent than `or` of them
-        let mut overflow = false;
-        let msb_a = !a.get().0 & 1 << 7;
-        let msb_b = b.get().0 & 1 << 7;
-        if (msb_a != msb_b) && ((msb_a | msb_b) != diffrence.0 & 1 << 7) {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum < 0);
-        self.set_flag('n', diffrence & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', diffrence == Wrapping(0u8));
-    }
-    pub fn inc(&mut self, b: &Register) -> Wrapping<u8> {
-        let sum = b.get() + Wrapping(1);
-        let non_wrapping_sum = (b.get().0) as u16 + 1;
-
-        // overflow flag is set when signed addition overflows
-        // that happens when msb of a and msb of b are the same
-        // but msb of result is diffrent
-        let mut overflow = false;
-        let msb_b = (b.get().0 & 1 << 7) as u16;
-        let msb_b_post_inc = non_wrapping_sum & 1 << 7;
-        if msb_b != msb_b_post_inc {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum > 255);
-        self.set_flag('n', sum & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', sum == Wrapping(0u8));
-
-        sum
-    }
-    pub fn dec(&mut self, b: &Register) -> Wrapping<u8> {
-        let diffrence = b.get() - Wrapping(1);
-        let non_wrapping_sum = (b.get().0) as i8 - 1;
-
-        // overflow flag is set when signed addition overflows
-        // that happens when msb of a and msb of b are the same
-        // but msb of result is diffrent
-        let mut overflow = false;
-        let msb_b = (b.get().0 & 1 << 7) as i8;
-        let msb_b_post_dec = non_wrapping_sum & 1 << 7;
-        if msb_b != msb_b_post_dec {
-            overflow = true;
-        }
-
-        self.set_flag('c', non_wrapping_sum >= 0);
-        self.set_flag('n', diffrence & Wrapping(128) == Wrapping(128));
-        self.set_flag('o', overflow);
-        self.set_flag('z', diffrence == Wrapping(0u8));
-
-        diffrence
-    }
-    pub fn shl(&mut self, b: &Register) -> Wrapping<u8> {
-        let sum: u8 = b.get().0 << 1;
-
-        // overflow flag is set when signed addition overflows
-        // that happens when msb of a and msb of b are the same
-        // but msb of result is diffrent
-        let mut overflow = false;
-        let msb_b = (b.get().0 & 1 << 7) as u8;
-        let msb_b_post_shl = sum & 1 << 7;
-        if msb_b != msb_b_post_shl {
-            overflow = true;
-        }
-
-        self.set_flag('c', sum < b.get().0);
-        self.set_flag('n', (sum & 128) == 128);
-        self.set_flag('o', overflow);
-        self.set_flag('z', sum == 0);
-
-        Wrapping(sum)
     }
 }
 
-// #[cfg(test)]
-// impl Arbitrary for Alu {
-//     fn arbitrary<G: Gen>(g: &mut G) -> Alu {
-//         Alu { flags: [false; 4] }.set()
-//     }
-// }
+impl ALU {
+    pub fn not(&mut self, b: u8) -> u8 {
+        !b
+    }
+    pub fn nor(&mut self, a: u8, b: u8) -> u8 {
+        !(a | b)
+    }
+    pub fn nand(&mut self, a: u8, b: u8) -> u8 {
+        !(a & b)
+    }
+    pub fn xor(&mut self, a: u8, b: u8) -> u8 {
+        a ^ b
+    }
+    pub fn xnor(&mut self, a: u8, b: u8) -> u8 {
+        !(a ^ b)
+    }
+    pub fn and(&mut self, a: u8, b: u8) -> u8 {
+        a & b
+    }
+    pub fn or(&mut self, a: u8, b: u8) -> u8 {
+        a | b
+    }
+
+    pub fn add(&mut self, a: u8, b: u8) -> u8 {
+        let sum: u8 = (Wrapping(a) + Wrapping(b)).0;
+
+        self.flags.c = a as u16 + b as u16 > sum as u16;
+        self.flags.h = (a | b) & 1 << 4 != sum & 1 << 4;
+        self.flags.o = (a | b) & 1 << 7 != sum & 1 << 7;
+        self.flags.z = sum == 0;
+
+        sum
+    }
+    pub fn adc(&mut self, a: u8, b: u8) -> u8 {
+        let a = (Wrapping(a) + Wrapping(self.flags.c as u8)).0;
+        self.add(a, b)
+    }
+
+    pub fn sub(&mut self, a: u8, b: u8) -> u8 {
+        let negative_b = (Wrapping(!b) + Wrapping(1u8)).0;
+        let diff = self.add(a, negative_b);
+
+        self.flags.c = a > b;
+
+        // half-carry flag is the opposite of borrow of the 5th bit
+        self.flags.h = (a ^ b) & 1 << 4 == diff & 1 << 4;
+        self.flags.o = (a ^ b) & 1 << 7 != diff & 1 << 7;
+        diff
+    }
+    pub fn sbc(&mut self, a: u8, b: u8) -> u8 {
+        // if the borrow (!carry) flag is set then add 1
+        let a = (Wrapping(a) + Wrapping(!self.flags.c as u8)).0;
+        self.sub(a, b)
+    }
+
+    /// normal subtraction but only update flags
+    pub fn cmp(&mut self, a: u8, b: u8) {
+        self.sub(a, b);
+    }
+    pub fn inc(&mut self, b: u8) -> u8 {
+        self.add(b, 1)
+    }
+    pub fn dec(&mut self, b: u8) -> u8 {
+        self.sub(b, 1)
+    }
+    /// will set flags to the values of the nth bits of the result
+    pub fn shl(&mut self, b: u8) -> u8 {
+        let res: u8 = b << 1;
+
+        self.flags.c = b & 0b1000_0000 == 1;
+        self.flags.h = b & 0b0000_0100 == 1;
+        self.flags.o = b & 0b0100_0000 == 1;
+        self.flags.z = res == 0;
+
+        res
+    }
+}
+
+#[cfg(test)]
+mod test_adding {
+    use super::*;
+
+    #[test]
+    fn test_no_flags() {
+        let mut alu = ALU::new();
+        assert_eq!(alu.add(2, 2), 4);
+        assert_eq!(alu.add(128, 128), 0);
+    }
+    #[test]
+    fn test_flag_c() {
+        let mut alu = ALU::new();
+        assert_eq!(alu.add(2, 2), 4);
+        assert_eq!(alu.flags.c, false);
+
+        assert_eq!(alu.add(255, 1), 0);
+        assert_eq!(alu.flags.c, true);
+
+        assert_eq!(alu.add(255, 255), 254);
+        assert_eq!(alu.flags.c, true);
+    }
+    #[test]
+    fn test_flag_h() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.add(8, 8), 16);
+        assert_eq!(alu.flags.h, true);
+
+        assert_eq!(alu.add(0b1111_1111, 1), 0);
+        assert_eq!(alu.flags.h, true);
+
+        assert_eq!(alu.add(0b1111_0000, 0b1111), 255);
+        assert_eq!(alu.flags.h, false);
+    }
+    #[test]
+    fn test_flag_o() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.add(0b1000_0000, 0b1000_0000), 0);
+        assert_eq!(alu.flags.o, true);
+
+        assert_eq!(alu.add(0b0111_1111, 0b0000_0001), 128);
+        assert_eq!(alu.flags.o, true);
+
+        assert_eq!(alu.add(0b1000_0000, 0b0000_0000), 128);
+        assert_eq!(alu.flags.o, false);
+    }
+    #[test]
+    fn test_flag_z() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.add(0, 0), 0);
+        assert_eq!(alu.flags.z, true);
+
+        assert_eq!(alu.add(255, 1), 0);
+        assert_eq!(alu.flags.z, true);
+    }
+    #[test]
+    fn test_add_with_carry() {
+        let mut alu = ALU::new();
+
+        alu.flags.c = true;
+        assert_eq!(alu.adc(0, 0), 1);
+
+        alu.flags.c = true;
+        assert_eq!(alu.adc(255, 0), 0);
+
+        alu.flags.c = true;
+        assert_eq!(alu.adc(255, 1), 1);
+    }
+}
+#[cfg(test)]
+mod test_subtracting {
+    use super::*;
+    #[test]
+    fn test_flags_to_byte() {
+        let mut alu = ALU::new();
+        alu.flags.c = true;
+        alu.flags.h = true;
+        alu.flags.o = false;
+        alu.flags.z = false;
+        assert_eq!(alu.flags.to_byte(), 0);
+
+        alu.flags.c = false;
+        alu.flags.h = false;
+        alu.flags.o = true;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 15);
+
+        alu.flags.c = true;
+        alu.flags.h = false;
+        alu.flags.o = true;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 14);
+
+        alu.flags.c = true;
+        alu.flags.h = true;
+        alu.flags.o = false;
+        alu.flags.z = true;
+        assert_eq!(alu.flags.to_byte(), 8);
+    }
+    #[test]
+    fn test_no_flags() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.sub(4, 2), 2);
+        assert_eq!(alu.sub(0, 1), 255);
+    }
+    #[test]
+    fn test_flag_c() {
+        let mut alu = ALU::new();
+        // carry flag is the opposite of borrow
+
+        assert_eq!(alu.sub(0, 1), 255);
+        assert_eq!(alu.flags.c, false);
+
+        assert_eq!(alu.sub(0, 255), 1);
+        assert_eq!(alu.flags.c, false);
+
+        assert_eq!(alu.sub(1, 0), 1);
+        assert_eq!(alu.flags.c, true);
+    }
+    #[test]
+    fn test_flag_h() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.sub(0, 1), 255);
+        assert_eq!(alu.flags.h, false);
+
+        assert_eq!(alu.sub(0, 255), 1);
+        assert_eq!(alu.flags.h, false);
+
+        assert_eq!(alu.sub(1, 0), 1);
+        assert_eq!(alu.flags.h, true);
+    }
+    #[test]
+    fn test_flag_o() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.sub(0, 1), 255);
+        assert_eq!(alu.flags.o, true);
+
+        assert_eq!(alu.sub(1, 0), 1);
+        assert_eq!(alu.flags.o, false);
+
+        assert_eq!(alu.sub(128, 128), 0);
+        assert_eq!(alu.flags.o, false);
+    }
+    #[test]
+    fn test_flag_z() {
+        let mut alu = ALU::new();
+
+        assert_eq!(alu.sub(0, 0), 0);
+        assert_eq!(alu.flags.z, true);
+
+        assert_eq!(alu.sub(1, 1), 0);
+        assert_eq!(alu.flags.z, true);
+
+        assert_eq!(alu.sub(0, 1), 255);
+        assert_eq!(alu.flags.z, false);
+    }
+
+    #[test]
+    fn test_subtract_with_borrow() {
+        let mut alu = ALU::new();
+
+        alu.flags.c = true;
+        assert_eq!(alu.sbc(0, 0), 0);
+
+        alu.flags.c = false;
+        assert_eq!(alu.sbc(0, 0), 1);
+
+        alu.flags.c = true;
+        assert_eq!(alu.sbc(255, 255), 0);
+
+        alu.flags.c = false;
+        assert_eq!(alu.sbc(255, 255), 1);
+    }
+}

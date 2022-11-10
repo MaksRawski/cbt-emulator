@@ -1,0 +1,14 @@
+$bg: #141418;
+$font: white;
+$fg: #921C5D;
+$fg_alt: #BA2075;
+$bg_alt: #4B273B;
+$font_alt: #C1C1C1;
+
+
+$active: #fc2d9f;
+
+@font-face{
+    font-family: "LCD dot matrix";
+    src: url("lcd-font/lcd-dot-matrix-hd44780u.ttf") format("truetype");
+}

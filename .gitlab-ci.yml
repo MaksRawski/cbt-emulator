@@ -1,0 +1,118 @@
+image: debian
+
+stages:
+  - build:backend
+  - build:frontend
+  - test
+  - deploy
+
+# templates
+.rust: &rust
+  image: rust
+  before_script:
+    - &rust-restore-cache stat cargo && (rm -r /usr/local/cargo; mv cargo /usr/local/cargo)
+  after_script:
+    - mv /usr/local/cargo cargo
+  cache:
+    key: rust
+    paths:
+      - target/
+      - cargo/
+
+.node: &node
+  image: node
+  cache:
+    key: npm
+    paths:
+      - web/node_modules
+      - web/node_modules
+
+# building the backend just to have it in cache
+build-rust:
+  <<: *rust
+  stage: build:backend
+  script:
+    - cargo build --release
+
+# testing the backend the moment it's built
+# and uploading the coverage to codecov using grcov
+# https://github.com/mozilla/grcov#grcov-with-travis
+test-backend:
+  <<: *rust
+  stage: test
+  needs:
+    - build-rust
+  before_script:
+    - *rust-restore-cache
+    - rustup component add llvm-tools-preview
+    - curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-x86_64-unknown-linux-gnu.tar.bz2 | tar jxf -
+    - curl -Os https://uploader.codecov.io/latest/linux/codecov
+    - chmod +x codecov
+  script:
+    # TODO data is empty?
+    # https://app.codecov.io/gitlab/MaksRawski/cbt-emulator/tree/develop
+    - export RUSTFLAGS="-Cinstrument-coverage"
+    - export LLVM_PROFILE_FILE="tests.profraw"
+    - cargo test
+    - ./grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing --ignore "/*" -o lcov.info
+    - ./codecov -t ${CODECOV_TOKEN} -f lcov.info
+  # artifacts:
+  #   reports:
+  #     coverage_report:
+  #       coverage_format: cobertura
+  #       path: coverage.xml
+  cache:
+    key: codecov
+    paths:
+      - cargo/
+      - target/
+
+# builds wasm package once the backend is built
+build-wasm:
+  <<: *rust
+  stage: build:backend
+  needs:
+    - build-rust
+  before_script:
+    - *rust-restore-cache
+    - apt-get update && apt-get install -y clang binaryen
+    - wasm-pack --version || cargo install wasm-pack
+  script:
+    - wasm-pack build --target web --out-dir web/pkg
+  artifacts:
+    untracked: false
+    expire_in: "1 day"
+    paths:
+      - web/pkg/
+
+# installs npm dependencies;
+# note: wasm package is also dependency so this job
+# will be run once all wasm stuff is generated
+build-npm:
+  <<: *node
+  stage: build:frontend
+  needs:
+    - build-wasm
+  script:
+    - cd web
+    - npm install
+  artifacts:
+    untracked: false
+    expire_in: "1 day"
+    paths:
+      - web/pkg/
+
+# creates a production build of the web interface
+# and deploys it to gitlab pages
+# MUST be run as the last job
+pages:
+  <<: *node
+  stage: deploy
+  script:
+    - cd web
+    - npm run build
+    - mv build ../public
+    - cd ../
+  artifacts:
+    paths:
+      - public

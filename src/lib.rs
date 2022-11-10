@@ -1,23 +1,25 @@
 //! # Finally you can play around with CBT on your own!
 //!
-//! This emulator takes real microcode
-//! straight from [CBT's generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
-//! and translates control word which that
-//! microcode would set into activating appropriate
-//! modules with correct actions.
+//! This emulator takes real microcode from modified
+//! [CBT's microcode generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
 
-// pub mod alu;
-// pub mod bus;
-// pub mod clock;
-// pub mod cpu;
-// pub mod lcd;
-// pub mod memory;
-// pub mod microcode;
-// pub mod pc;
-// pub mod reg;
+pub mod alu;
+pub mod bus;
+pub mod clock;
+pub mod cpu;
+#[allow(dead_code)]
+pub mod cw;
+#[macro_use]
+pub mod js;
+pub mod lcd;
+pub mod memory;
+pub mod microcode;
+pub mod pc;
+pub mod reg;
 
 use wasm_bindgen::prelude::*;
 
+// wee_alloc is smaller but also slower allocator
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 // #[cfg(feature = "wee_alloc")]
@@ -31,7 +33,9 @@ pub fn setup_logging() {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 }
 
-#[wasm_bindgen]
-pub fn add(a: u8, b: u8) -> u8 {
-    a + b
-}
+// #[wasm_bindgen(start)]
+// pub fn run() {
+//     log(&format!("Hello from {}!", name())); // should output "Hello from Rust!"
+
+//     let r = reg::Register::new();
+// }

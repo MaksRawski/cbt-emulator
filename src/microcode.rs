@@ -1,74 +1,82 @@
-// TODO:
-// 1. create control_word: u32
-// 2. change format of these files to be actual bytes
-// https://gitlab.com/MaksRawski/cbt/-/blob/master/Microcode/microcode
-// 3. When there is a request of instruction
-// go to certain byte of a file and set control word
-// appropriately.
-// microcode.p0 would set first 8 bits of control word
-// microcode.p1 would set another 8 bits of control word
-// etc.
-// 4. create decoder which then based on that control word
-// activates appropriate modules by going through CW bit by bit
-// (probably).
-// 5. use tx,rx as bus
+use crate::cw::*;
 
-//! Decoding logic.
-//! takes value in IR and based on
-//! that activates appropriate modules
-
-use crate::cpu::Cpu;
-#[warn(unused_imports)]
-use serde::{Deserialize, Serialize};
-// use std::num::Wrapping;
-
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-pub struct Microcode {}
+/// Instance of loaded microcode
+pub struct Microcode {
+    bin: Vec<u32>,
+}
 
 impl Microcode {
-    pub fn new() -> Self {
-        Self {}
+    /// First decompresses the microcode
+    /// then goes through it in chunks of 4 bytes to
+    /// convert it into an vector of u32's.
+    pub fn load() -> Self {
+        let mut buf = Vec::<u8>::with_capacity(262144);
+        let mut bin = Vec::<u32>::with_capacity(65536);
+
+        let compressed_ucode = include_bytes!("../ucode/ucode.zstd");
+        let mut d = zstd_safe::DCtx::create();
+
+        d.decompress(&mut buf, compressed_ucode)
+            .expect("Failed to decompress microcode!");
+
+        for c in buf.chunks_exact(4) {
+            // c __doesn't__ have a known size
+            // below ensures that it is in fact static array
+            // of 4 bytes
+            let mut bytes = [0u8; 4];
+            for j in 0..4 {
+                bytes[j] = c[j];
+            }
+            bin.push(u32::from_be_bytes(bytes));
+        }
+        Self { bin }
     }
-    pub fn decode_and_exectue(&mut self, cpu: &mut Cpu) {
-        // match type of instruction first
-        //     0b00 => {
-        //         // mov operations
-        //         let src = ir & 0b111;
-        //         let dst = (ir >> 3) & 0b111;
-        //         match src {
-        //             0..=0b11 => {
-        //                 // general purpose registers
-        //             }
-        //             0b100 => {
-        //                 // sp is src
-        //             }
-        //             0b101 => {
-        //                 // pc is src
-        //             }
-        //             0b110 => {
-        //                 // send command to lcd
-        //             }
-        //             0b111 => {
-        //                 // mov with immediate opperand or jump
-        //             }
-        //         }
-        //         match dst {}
-        //     }
-        //     0b01 => {
-        //         // load operations
-        //         let src = ir & 0b111;
-        //         let dst = (ir >> 3) & 0b111;
-        //         match src {}
-        //         match dst {}
-        //     }
-        //     0b10 => {
-        //         // store operations
-        //         let src = ir & 0b111;
-        //         let dst = (ir >> 3) & 0b111;
-        //     }
-        //     0b11 => {
-        //         // alu operations
-        //     }
-        // }
+    /// flags and utime only care about 4 lowest bits
+    pub fn instruction_to_cw(&self, instruction: &u8, flags: &u8, utime: &u8) -> u32 {
+        // from microcode generator script:
+        //  address is composed as so
+        //  FLAGS  MICROTIME INSTRUCTION
+        //  xxxx   xxxx      xxxx xxxx
+        let flags = ((flags & 0b1111) as usize) << 12;
+        let utime = ((utime & 0b1111) as usize) << 8;
+
+        // cw with some bits inverted
+        // checkout https://gitlab.com/MaksRawski/cbt/-/wikis/Microcode
+        // to see why that is
+        let raw_cw = self.bin[(flags | utime | *instruction as usize)];
+
+        // since this is an emulator it would be easier
+        // if modules where active high
+        // therefore everything should be inverted appropriately
+        let mask = u32::MAX ^ (MI | PCC | AL0 | AL1 | AL2 | AL3);
+
+        raw_cw ^ mask
+    }
+}
+
+#[cfg(test)]
+mod test_microcode {
+    use super::*;
+
+    #[test]
+    fn test_loading() {
+        let _ = Microcode::load();
+    }
+    #[test]
+    fn test_instruction_to_cw() {
+        let m = Microcode::load();
+
+        // at utime 0..3 we always fetch the instruction
+        // 1. LPO | LAI      (low program counter out, low address in)
+        // 2. HPO | HAI      (high program counter out, high address in)
+        // 3. MO  | II | PCC (Low program counter out, low address in)
+        let cw = m.instruction_to_cw(&0, &0, &0);
+        assert_eq!(cw, LPO | LAI);
+
+        let cw = m.instruction_to_cw(&0, &0, &1);
+        assert_eq!(cw, HPO | HAI);
+
+        let cw = m.instruction_to_cw(&0, &0, &2);
+        assert_eq!(cw, MO | II | PCC);
     }
 }

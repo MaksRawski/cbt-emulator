@@ -1,270 +1,165 @@
-pub use cbt_emulator;
-pub use cbt_emulator::alu::Alu;
-pub use cbt_emulator::bus::DataBus;
-pub use cbt_emulator::lcd::Lcd;
-pub use cbt_emulator::reg::Register;
-// extern crate quickcheck;
-// extern crate quickcheck_macros;
+// https://rustwasm.github.io/wasm-bindgen/wasm-bindgen-test/usage.html
 
-// use quickcheck::quickcheck;
-// #[macro_use(quickcheck)]
-use std::num::Wrapping;
+use cbt_emulator::cpu::Cpu;
 
-mod test_alu {
+#[cfg(test)]
+mod test_instructions {
     use super::*;
-
-    // TODO: somehow get rid of this repetetive declaration of variables
     #[test]
-    fn not() {
-        let mut alu = Alu::new();
-        let mut b = Register::new();
+    fn test_mov() {
+        let mut cpu = Cpu::new();
+        // mov a, 42
+        cpu.load_program(vec![0b00_000_111, 42]);
 
-        b.set(1);
-        assert_eq!(alu.not(&b), Wrapping(254));
+        // mov takes 6 steps
+        for _ in 0..6 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.ra.data, 42)
+    }
+    #[test]
+    fn test_jumps() {
+        let mut cpu = Cpu::new();
+
+        // jmp test
+        // mov a, 2
+        // hlt
+        //
+        // test:
+        //  mov a, 42
+        //  hlt
+        cpu.load_program(vec![
+            0b00101111, 0b00000000, 0b00000110, 0b00000111, 0b00000010, 0b00110110, 0b00000111,
+            0b00101010, 0b00110110,
+        ]);
+        for _ in 0..50 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.ra.data, 42);
     }
 
     #[test]
-    fn nor() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
+    fn test_conditional_jumps() {
+        let mut cpu = Cpu::new();
+        // main:
+        //   mov a, 1
+        //   dec a
+        //   jz zero
+        //   mov b, 255
+        //   hlt
+        // zero:
+        //   mov b, 42
 
-        a.set(15);
-        b.set(240);
-        assert_eq!(alu.nor(&a, &b), Wrapping(0));
-    }
-    #[test]
-    fn nand() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(14);
-        b.set(28);
-        assert_eq!(alu.nand(&a, &b), Wrapping(255 - 12));
-    }
-    #[test]
-    fn xor() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(14);
-        b.set(28);
-        assert_eq!(alu.xor(&a, &b), Wrapping(18));
-    }
-    #[test]
-    fn xnor() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(14);
-        b.set(28);
-        assert_eq!(alu.xnor(&a, &b), Wrapping(255 - 18));
-    }
-    #[test]
-    fn and() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(14);
-        b.set(28);
-        assert_eq!(alu.and(&a, &b), Wrapping(12));
-    }
-    #[test]
-    fn or() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(14);
-        b.set(28);
-        assert_eq!(alu.or(&a, &b), Wrapping(30));
+        cpu.load_program(vec![
+            0x07, 0x01, 0xf8, 0x2b, 0x00, 0x09, 0x0f, 0xff, 0x36, 0x0f, 0x2a,
+        ]);
+        for _ in 0..40 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.rb.data, 42);
     }
 
     #[test]
-    fn add() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
+    fn test_loads() {
+        let mut cpu = Cpu::new();
 
-        a.set(127);
-        b.set(127);
-
-        assert_eq!(alu.add(&a, &b), Wrapping(254));
-        assert_eq!(alu.get_flag('c'), false);
-        assert_eq!(alu.get_flag('n'), true);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), false);
-    }
-    #[test]
-    fn adc() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        alu.set_flag('c', true);
-        a.set(63);
-        b.set(64);
-
-        assert_eq!(alu.adc(&a, &b), Wrapping(128));
-        assert_eq!(alu.get_flag('c'), false);
-        assert_eq!(alu.get_flag('n'), true);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), false);
-    }
-    #[test]
-    fn sub() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(128);
-        b.set(128);
-        // -128-(-128) = 0
-
-        assert_eq!(alu.sub(&a, &b), Wrapping(0));
-        assert_eq!(alu.get_flag('c'), true);
-        assert_eq!(alu.get_flag('n'), false);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), true);
-    }
-    #[test]
-    fn sbc() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        alu.set_flag('c', false);
-        a.set(128);
-        b.set(128);
-
-        assert_eq!(alu.sbc(&a, &b), Wrapping(255));
-        assert_eq!(alu.get_flag('c'), false);
-        assert_eq!(alu.get_flag('n'), true);
-        assert_eq!(alu.get_flag('o'), false);
-        assert_eq!(alu.get_flag('z'), false);
-    }
-    #[test]
-    fn cmp() {
-        let mut alu = Alu::new();
-        let mut a = Register::new();
-        let mut b = Register::new();
-
-        a.set(128);
-        b.set(128);
-
-        alu.cmp(&a, &b);
-        assert_eq!(alu.get_flag('c'), false);
-        assert_eq!(alu.get_flag('n'), false);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), true);
-    }
-    #[test]
-    fn inc() {
-        let mut alu = Alu::new();
-        let mut b = Register::new();
-
-        b.set(255);
-
-        assert_eq!(alu.inc(&b), Wrapping(0));
-        assert_eq!(alu.get_flag('c'), true);
-        assert_eq!(alu.get_flag('n'), false);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), true);
-    }
-    #[test]
-    fn dec() {
-        let mut alu = Alu::new();
-        let mut b = Register::new();
-
-        b.set(0);
-
-        assert_eq!(alu.dec(&b), Wrapping(255));
-        assert_eq!(alu.get_flag('c'), false);
-        assert_eq!(alu.get_flag('n'), true);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), false);
-    }
-    #[test]
-    fn shl() {
-        let mut alu = Alu::new();
-        let mut b = Register::new();
-
-        b.set(128);
-
-        assert_eq!(alu.shl(&b), Wrapping(0));
-        assert_eq!(alu.get_flag('c'), true);
-        assert_eq!(alu.get_flag('n'), false);
-        assert_eq!(alu.get_flag('o'), true);
-        assert_eq!(alu.get_flag('z'), true);
+        // mov b, 4
+        // load a, [cb]
+        // hlt
+        //
+        // #d8 42
+        cpu.load_program(vec![
+            0b00001111, 0b00000100, 0b01000001, 0b00110110, 0b00101010,
+        ]);
+        for _ in 0..40 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.ra.data, 42);
     }
 }
-
+#[cfg(test)]
 mod test_lcd {
     use super::*;
 
     #[test]
-    fn buffer() {
-        let mut lcd = Lcd::new();
-        lcd.txt(67);
-        lcd.txt(66);
-        lcd.txt(84);
-        let mut chars = lcd.display.buffer[0].chars();
-        assert_eq!(chars.next(), Some('C'));
-        assert_eq!(chars.next(), Some('B'));
-        assert_eq!(chars.next(), Some('T'));
-    }
-    #[test]
-    fn cursor_auto_increment() {
-        let mut lcd = Lcd::new();
-        lcd.txt(67);
-        lcd.txt(66);
-        lcd.txt(84);
-        assert_eq!(lcd.cursor.get_row(), 0);
-        assert_eq!(lcd.cursor.get_column(), 3);
-        lcd.cmd(0xc0);
-        assert_eq!(lcd.cursor.get_row(), 1);
-        assert_eq!(lcd.cursor.get_column(), 0);
-    }
-    #[test]
-    fn cursor_manual_increment() {
-        let mut lcd = Lcd::new();
-        for _ in 0..40 {
-            lcd.cmd(6);
+    fn test_lcd_out() {
+        let mut cpu = Cpu::new();
+
+        // mov lcd, 42
+        // mov lcdc, 0xf // display on, cursor on, blining on
+        cpu.load_program(vec![0b00_110_111, 42, 0b00_111_110, 0xf]);
+
+        for _ in 0..7 {
+            cpu.tick();
         }
-        assert_eq!(lcd.cursor.get_row(), 1);
-        assert_eq!(lcd.cursor.get_column(), 0);
-        lcd.cmd(4);
-        assert_eq!(lcd.cursor.get_row(), 0);
-        assert_eq!(lcd.cursor.get_column(), 39);
-        lcd.cmd(0xc0);
-        assert_eq!(lcd.cursor.get_row(), 1);
-        assert_eq!(lcd.cursor.get_column(), 0);
+        // display is off so there shouldn't be any value
+        assert_eq!(cpu.lcd.content(), None);
+
+        // turning on the display
+        for _ in 0..7 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.lcd.content().unwrap()[0], 42);
     }
     #[test]
-    fn shifts() {
-        let mut lcd = Lcd::new();
-        lcd.txt(65);
+    fn test_lcd_string() {
+        let mut cpu = Cpu::new();
 
-        lcd.cmd(0x1c);
-        let mut chars = lcd.display.buffer[0].chars();
-        assert_eq!(chars.next(), Some('\0'));
-        assert_eq!(chars.next(), Some('A'));
+        // mov lcdc, 0x1     ; clear display
+        // mov lcdc, 0xF     ; display on, cursor on, blinking on
+        // mov lcdc, 0x38    ; function set: 8 bit words, 2 lines
+        //
+        // mov lcd, 65
+        // mov lcd, 66
+        // mov lcd, 67
+        cpu.load_program(vec![
+            0x3e, 0x01, 0x3e, 0x0f, 0x3e, 0x38, 0x37, 0x41, 0x37, 0x42, 0x37, 0x43,
+        ]);
 
-        lcd.cmd(0x18);
-        let mut chars = lcd.display.buffer[0].chars();
-        assert_eq!(chars.next(), Some('A'));
+        for _ in 0..50 {
+            cpu.tick();
+        }
+        assert_eq!(cpu.lcd.content().unwrap()[0..3], [65, 66, 67]);
     }
 }
-mod test_memory {
+#[cfg(test)]
+mod test_programs {
     use super::*;
-
+    // #[wasm_bindgen_test]
     #[test]
-    fn get_from_ram() {
-        let mut ram = Ram::new();
-        let mut rom = Rom::new();
+    fn test_hello_world() {
+        let mut cpu = Cpu::new();
+        //  0:0 |    0 |          ; main:
+        //  0:0 |    0 | 27 ff    ; mov SP, 0xFF
+        //  2:0 |    2 | 3e 01    ; mov lcdc, 0x1
+        //  4:0 |    4 | 3e 0f    ; mov lcdc, 0xF
+        //  6:0 |    6 | 3e 38    ; mov lcdc, 0x38
+        //  8:0 |    8 | 39 00 18 ; mov cb, [txt]
+        //  b:0 |    b | 07 00    ; mov a, 0
+        //  d:0 |    d |          ; printStr:
+        //  d:0 |    d | 59       ; load d,[cb]
+        //  e:0 |    e | f5       ; inc b
+        //  f:0 |    f | f3       ; cmp a,d
+        // 10:0 |   10 | 2b 00 17 ; jz halt
+        // 13:0 |   13 | 33       ; mov lcd,d
+        // 14:0 |   14 | 2f 00 0d ; jmp printStr
+        // 17:0 |   17 |          ; halt:
+        // 17:0 |   17 | 36       ; hlt
+        // 18:0 |   18 |          ; txt:
+        // 18:0 |   18 | 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 21 00 ; #d "Hello, world!\0"
+        let hello_world = [
+            0x3e, 0x01, 0x3e, 0x0f, 0x3e, 0x38, 0x39, 0x00, 0x16, 0x07, 0x00, 0x59, 0xf5, 0xf3,
+            0x2b, 0x00, 0x15, 0x33, 0x2f, 0x00, 0x0b, 0x36, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c,
+            0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x00,
+        ];
+        cpu.load_program(Vec::from(hello_world));
+        for _ in 0..600 {
+            cpu.tick();
+        }
+
+        assert_eq!(
+            cpu.lcd.string_content(),
+            Some(format!("Hello, world!{}", "\0".repeat(32 - 13)))
+        );
     }
 }
