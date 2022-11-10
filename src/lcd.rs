@@ -1,6 +1,9 @@
 //! Emulates HD74480 lcd 16x2 variant.
 
+use serde::{Deserialize, Serialize};
 pub use wasm_bindgen::prelude::*;
+
+use crate::js::update_lcd;
 
 // #[wasm_bindgen]
 // extern "C" {
@@ -13,20 +16,20 @@ pub use wasm_bindgen::prelude::*;
 // }
 
 #[wasm_bindgen]
-#[derive(Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Lcd {
     display: Display,
     cursor: Cursor,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Display {
-    pub buffer: [u8; 80],
+    pub buffer: Vec<u8>,
     two_line_mode: bool,
     on: bool,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Cursor {
     row: u8,
     column: u8,
@@ -91,13 +94,13 @@ impl Cursor {
 impl Display {
     pub fn new() -> Self {
         Self {
-            buffer: [0; 80],
+            buffer: vec![0; 80],
             on: false,
             two_line_mode: false,
         }
     }
     pub fn clear(&mut self) {
-        self.buffer = [0; 80];
+        self.buffer = vec![0; 80];
     }
     pub fn add(&mut self, cur: &mut Cursor, charcode: u8) {
         self.buffer[cur.location()] = charcode;
@@ -108,7 +111,7 @@ impl Display {
         cur.increment();
     }
     pub fn shift_right(&mut self) {
-        let mut new_buffer = [0u8; 80];
+        let mut new_buffer = vec![0u8; 80];
         new_buffer[0] = 0;
         for i in 1..80 {
             new_buffer[i] = self.buffer[i - 1];
@@ -116,7 +119,7 @@ impl Display {
         self.buffer = new_buffer;
     }
     pub fn shift_left(&mut self) {
-        let mut new_buffer = [0u8; 80];
+        let mut new_buffer = vec![0u8; 80];
         for i in 0..79 {
             new_buffer[i] = self.buffer[i + 1];
         }
@@ -154,6 +157,7 @@ impl Lcd {
     }
     pub fn txt(&mut self, chr: u8) {
         self.display.add(&mut self.cursor, chr);
+        update_lcd(&self).unwrap();
     }
     pub fn cmd(&mut self, cmd: u8) {
         match cmd {
@@ -186,10 +190,10 @@ impl Lcd {
             0xc0 => self.cursor.second_row(),
             _ => {}
         }
+        update_lcd(&self).unwrap();
     }
 }
 
-#[wasm_bindgen]
 impl Lcd {
     /// returns vector of 32 bytes (if the display is on)
     pub fn content(&self) -> Option<Vec<u8>> {
@@ -198,7 +202,7 @@ impl Lcd {
             out.append(&mut self.display.buffer[0..16].to_vec());
             out.append(&mut self.display.buffer[64..80].to_vec());
 
-            return Some(Vec::from(self.display.buffer));
+            return Some(out);
         }
         None
     }

@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-use crate::alu::Flags;
+use crate::{alu::Flags, lcd::Lcd};
 
 pub const OFF: char = '○';
 pub const ON: char = '●';
@@ -17,8 +17,8 @@ extern "C" {
 #[wasm_bindgen]
 extern "C" {
     pub fn set_cw(cw: u32);
-
     pub fn set_flags(flags: JsValue);
+    pub fn set_display(flags: JsValue);
 
 }
 
@@ -59,17 +59,24 @@ pub fn update_cw(cw: u32) {
         unsafe {
             set_cw(cw);
         }
-        // for i in 0..32 {
-        //     let value = if (cw & 1 << i) > 0 { ON } else { OFF };
-        //     update_dom_element(CW_LABELS[i], &value.to_string());
-        // }
     }
 }
 
+pub fn update_lcd(lcd: &Lcd) -> Result<(), JsValue> {
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_display(serde_wasm_bindgen::to_value(lcd)?);
+        }
+    }
+    Ok(())
+}
 pub fn update_flags(flags: &Flags) -> Result<(), JsValue> {
-    #[allow(unused_unsafe)]
-    unsafe {
-        set_flags(serde_wasm_bindgen::to_value(flags)?);
+    if cfg!(target_family = "wasm") {
+        #[allow(unused_unsafe)]
+        unsafe {
+            set_flags(serde_wasm_bindgen::to_value(flags)?);
+        }
     }
     Ok(())
 }

@@ -1,23 +1,26 @@
 import './css/App.scss';
 import { CLK } from './clk';
 import { ModuleTemplate } from './Modules';
-import { Flags } from './alu';
+import { Flags, FlagsType } from './alu';
 import { CW } from './cw';
+import { LCD, LCDState } from './lcd';
 
 // TODO ideally we would want to move these global setters somewhere else
 declare global{
     function set_cw(cw: number): void
-    function set_flags(flags: {c: boolean, h: boolean, o: boolean, z: boolean}): void
+    function set_flags(flags: FlagsType): void
+    function set_lcd(display: LCDState): void
 }
 
-export function set_cw(cw: number){
+export function set_cw(){
     console.log("not set yet")
 }
-export function set_flags(cw: number){
+export function set_flags(){
     console.log("not set yet")
 }
-
-global.set_cw = set_cw;
+export function update_display(){
+    console.log("not set yet")
+}
 
 const App = () => {
     return (

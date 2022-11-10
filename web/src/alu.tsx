@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { CPUModule } from "./Modules";
 
 const OFF = '○';

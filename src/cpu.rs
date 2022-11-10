@@ -14,10 +14,9 @@ use crate::reg::Register;
 
 #[wasm_bindgen]
 pub struct Cpu {
-    pub bus: Bus,
-    pub clock: Clock,
-    pub pc: ProgramCounter,
-    pub lcd: Lcd,
+    bus: Bus,
+    clock: Clock,
+    pc: ProgramCounter,
     alu: ALU,
     mem: Memory,
     ucode: Microcode,
@@ -34,6 +33,9 @@ pub struct Cpu {
     pub rd: Register,
     #[wasm_bindgen(skip)]
     pub sp: Register,
+
+    #[wasm_bindgen(skip)]
+    pub lcd: Lcd,
 }
 
 #[wasm_bindgen]
