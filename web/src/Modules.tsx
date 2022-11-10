@@ -12,15 +12,15 @@ export class CPUModule<P, S> extends React.Component<P, S> {
     /**
      * Returns a handle for the backend to put binary data in this place.
      */
-    led(id: string) {
+    led(id: string): ReactNode {
         return <div className="LED" id={id}>-</div>
     }
 
-    module() {
+    module(): ReactNode {
         return this.led(this.id || this.name);
     }
 
-    render() {
+    render(): ReactNode {
         return (
             <div className="module">
                 <h2 className="module-header">{this.name}</h2>

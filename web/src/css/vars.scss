@@ -7,3 +7,8 @@ $font_alt: #C1C1C1;
 
 
 $active: #fc2d9f;
+
+@font-face{
+    font-family: "LCD dot matrix";
+    src: url("../../public/lcd-font/lcd-dot-matrix-hd44780u.ttf") format("truetype");
+}

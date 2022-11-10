@@ -1,6 +1,7 @@
 # CBT emulator
 
 [CBT](https://gitlab.com/MaksRawski/cbt/) emulator written in rust compiled to webassembly with an interface in react.
+Available to play with at: https://maksrawski.gitlab.io/cbt-emulator/.
 
 ## Microcode
 Refer to `ucode/README.md` for information about generating microcode.
@@ -18,7 +19,7 @@ however its integration tests have to be run with `wasm-pack test --node`
 ## functionality
 - [x] add labels to each bit of CW
 - [X] fix hello world
-- [ ] add LCD module in UI (using react setters)
+- [X] add LCD module in UI (using react setters)
 - [ ] disable CLK when in HLT
 - [ ] add a way of previewing what's in ram
 - [ ] add a way to set up custom interrupts, which key on the keyboard would trigger which routine in _interrupt space_
@@ -28,6 +29,7 @@ however its integration tests have to be run with `wasm-pack test --node`
 - [ ] style for mobile, add a "real view"
 - [ ] add tooltips
 - [ ] improve clock module's controls
+- [ ] cw module should be toggleable
 
 ## extra
 - [ ] setup codecov
@@ -35,3 +37,7 @@ however its integration tests have to be run with `wasm-pack test --node`
 
 ## changing state
 try to use [this](https://stackoverflow.com/a/31869669) somehow
+
+# Acknowledgments 
+- ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
+was used for the LCD's font.

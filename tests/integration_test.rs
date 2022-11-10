@@ -36,7 +36,6 @@ mod test_instructions {
         for _ in 0..50 {
             cpu.tick();
         }
-        dbg!(cpu.pc);
         assert_eq!(cpu.ra.data, 42);
     }
 
@@ -161,7 +160,7 @@ mod test_programs {
 
         assert_eq!(
             cpu.lcd.string_content(),
-            Some(format!("Hello, world!{}", "\0".repeat(80 - 13)))
+            Some(format!("Hello, world!{}", "\0".repeat(32 - 13)))
         );
     }
 }
