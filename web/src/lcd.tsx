@@ -49,7 +49,7 @@ export class LCD extends CPUModule<{}, LCDState>{
         for (let i = 0; i <= 16; i++) {
             s.push(String.fromCharCode(this.state.display.buffer[i + 40*row]));
         }
-        if (this.state.cursor.visible && this.state.cursor.row == row) {
+        if (this.state.cursor.visible && this.state.cursor.row === row) {
             s[this.state.cursor.column] = <span className="cursor blinking"></span>
         }
         return (
