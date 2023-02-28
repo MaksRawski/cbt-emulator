@@ -43,7 +43,7 @@ export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNo
     name = this.props.name
     id = this.props.id || this.props.name
     children = this.props.children
-    description = this.props.description || this.props.name
+    description = this.props.description
 
     module() {
         return (<div>{this.children} {super.module()}</div>);

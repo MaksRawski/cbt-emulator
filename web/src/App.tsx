@@ -38,29 +38,29 @@ const App = () => {
                     <CLK />
                     <div className="memory">
                         <ModuleTemplate name="RAM" />
-                        <ModuleTemplate name="MAR" description="memory address register" />
+                        <ModuleTemplate name="MAR" description="MEMORY ADDRESS REGISTER" />
                     </div>
-                    <ModuleTemplate name="IR" description="instruction register" />
-                    <ModuleTemplate name="µT" id="utime" description='micro time/step counter' />
+                    <ModuleTemplate name="IR" description="INSTRUCTION REGISTER" />
+                    <ModuleTemplate name="µT" id="utime" description="MICRO TIME/STEP COUNTER" />
                 </div>
                 <div className="BUS module-column">
                     <ModuleTemplate name="BUS" />
                 </div>
                 <div className="module-column">
-                    <ModuleTemplate name="PC" description="program counter" />
+                    <ModuleTemplate name="PC" description="PROGRAM COUNTER" />
                     <div className="row">
-                        <ModuleTemplate name="RA" description="register A" />
-                        <ModuleTemplate name="RB" description="register B" />
+                        <ModuleTemplate name="RA" description="REGISTER A" />
+                        <ModuleTemplate name="RB" description="REGISTER B" />
                     </div>
                     <div className="row">
-                        <ModuleTemplate name="ALU" description="arithmetic logic unit" />
+                        <ModuleTemplate name="ALU" description="ARITHMETIC LOGIC UNIT" />
                         <Flags />
                     </div>
                     <div className="row">
-                        <ModuleTemplate name="RC" description="register C" />
-                        <ModuleTemplate name="RD" description="register D" />
+                        <ModuleTemplate name="RC" description="REGISTER C" />
+                        <ModuleTemplate name="RD" description="REGISTER D" />
                     </div>
-                    <ModuleTemplate name="SP" description="stack pointer" />
+                    <ModuleTemplate name="SP" description="STACK POINTER" />
                     <LCD />
                     <CW />
                 </div>
