@@ -41,6 +41,10 @@ a{
   text-align: center;
 }
 
+.module-header:hover{
+  cursor: default;
+}
+
 .module{
   text-align: center;
   // padding: 5px;
@@ -54,17 +58,4 @@ a{
 .row > *{
   flex: 1;
   // padding: 5px;
-}
-
-.LED{
-  font-family: "monospace";
-  font-size: 2em;
-  margin: 0;
-  padding: 0;
-  color: $font;
-}
-
-.LED-label{
-  position: absolute;
-  display: inline-grid;
 }

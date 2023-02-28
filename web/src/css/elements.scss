@@ -2,6 +2,21 @@
 
 @import './vars';
 
+.LED{
+  font-family: "monospace";
+  font-size: 2em;
+  margin: 0;
+  padding: 0;
+  color: $font;
+}
+.LED:hover{
+  cursor: default;
+}
+.LED-label{
+  position: absolute;
+  display: inline-grid;
+}
+
 .clock{
   display: flex;
   flex-flow: column;
