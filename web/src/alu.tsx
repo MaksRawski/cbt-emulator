@@ -1,3 +1,4 @@
+import { Tooltip } from "@mui/material";
 import { CPUModule } from "./Modules";
 
 const OFF = '○';
@@ -26,7 +27,12 @@ export class Flags extends CPUModule<{}, FlagsType>{
                     {this.state.o? ON:OFF}
                     {this.state.z? ON:OFF}
                 </div>
-                <div className="flags-label">C H O Z</div>
+                <div className="flags-label">
+                    <Tooltip placement="top" title="carry"><span>C </span></Tooltip>
+                    <Tooltip placement="top" title="half-carry"><span>H </span></Tooltip>
+                    <Tooltip placement="top" title="overflow"><span>O </span></Tooltip>
+                    <Tooltip placement="top" title="zero"><span>Z</span></Tooltip>
+                </div>
             </div>
         )
     }

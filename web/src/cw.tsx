@@ -12,6 +12,8 @@ const CW_LABELS = [
 
 export class CW extends CPUModule<{}, { cw: number }>{
     name = "CW"
+    description = "control word"
+
     constructor(props: any) {
         super(props);
         this.state = { cw: 0 };

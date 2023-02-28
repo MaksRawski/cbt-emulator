@@ -1,3 +1,4 @@
+import { Tooltip } from "@mui/material";
 import React, { ReactNode } from "react"
 
 /**
@@ -9,6 +10,7 @@ import React, { ReactNode } from "react"
 export class CPUModule<P, S> extends React.Component<P, S> {
     name: string = "CPUModule"
     id?: string
+    description?: string
     /**
      * Returns a handle for the backend to put binary data in this place.
      */
@@ -23,7 +25,9 @@ export class CPUModule<P, S> extends React.Component<P, S> {
     render(): ReactNode {
         return (
             <div className="module">
-                <h2 className="module-header">{this.name}</h2>
+                <Tooltip followCursor title={this.description || ""}>
+                    <h2 className="module-header">{this.name}</h2>
+                </Tooltip>
                 {this.module()}
             </div>
         )
@@ -35,12 +39,13 @@ export class CPUModule<P, S> extends React.Component<P, S> {
 /**
  * Template for creating basic modules
  */
-export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string }, {}>{
+export class ModuleTemplate extends CPUModule<{ name: string, children?: ReactNode, id?: string, description?: string }, {}>{
     name = this.props.name
     id = this.props.id || this.props.name
     children = this.props.children
+    description = this.props.description || this.props.name
 
-    module(){
+    module() {
         return (<div>{this.children} {super.module()}</div>);
     }
 }
