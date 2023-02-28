@@ -65,6 +65,9 @@ div.BUS{
 .cb{
   position: relative;
 }
+.cb:hover{
+  cursor: default;
+}
 .cb-label{
   font-size: 1em;
   display: block;
