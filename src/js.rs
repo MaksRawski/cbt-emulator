@@ -16,10 +16,10 @@ extern "C" {
 
 #[wasm_bindgen]
 extern "C" {
+    pub fn halt();
     pub fn set_cw(cw: u32);
     pub fn set_flags(flags: JsValue);
     pub fn set_lcd(flags: JsValue);
-
 }
 
 #[macro_export]

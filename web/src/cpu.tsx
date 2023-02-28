@@ -1,6 +1,10 @@
 import init, { Cpu, setup_logging } from 'cbt_emulator';
 export let cpu: Cpu;
 
+export function reset_cpu() : void {
+    cpu = Cpu.new();
+}
+
 init().then(() => {
     setup_logging();
 

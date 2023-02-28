@@ -2,7 +2,7 @@ use std::num::Wrapping;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::js::{update_dom_element, update_dom_number};
+use crate::js::{halt, log, update_dom_number};
 
 #[wasm_bindgen]
 #[derive(Clone, Copy)]
@@ -35,6 +35,12 @@ impl Clock {
     }
     pub fn hlt(&mut self) {
         self.halted = true;
-        update_dom_element("utime", "HALT");
+        if cfg!(target_family = "wasm") {
+            #[allow(unused_unsafe)]
+            unsafe {
+                log("should halt now!");
+                halt();
+            }
+        }
     }
 }

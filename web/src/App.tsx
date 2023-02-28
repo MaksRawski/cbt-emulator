@@ -10,6 +10,7 @@ declare global{
     function set_cw(cw: number): void
     function set_flags(flags: FlagsType): void
     function set_lcd(display: LCDState): void
+    function halt(): void
 }
 
 export function set_cw(){
@@ -20,6 +21,9 @@ export function set_flags(){
 }
 export function set_lcd(){
     console.log("not set yet")
+}
+export function halt(){
+    console.log("not set yet");
 }
 
 const App = () => {
