@@ -10,34 +10,36 @@ const CW_LABELS = [
     "LCM", "LCE", "SPO", "SPI",
 ];
 
-export class CW extends CPUModule<{}, {cw: number}>{
+export class CW extends CPUModule<{}, { cw: number }>{
     name = "CW"
     constructor(props: any) {
         super(props);
-        this.state = {cw: 0};
+        this.state = { cw: 0 };
     }
     componentDidMount(): void {
         global.set_cw = (v: number) => {
             this.setState({ cw: v });
         }
     }
-    cw_to_labels(cw: number){
+    cw_to_labels(cw: number) {
         let cws: [boolean?] = [];
 
-        for (let i = 0; i < 32; i++){
+        for (let i = 0; i < 32; i++) {
             cws[i] = ((cw & (1 << i)) > 0)
         }
         return (
             <div id="CW">
-                {cws.map((v, i) => { return(
-                    <div className="cb" key={i}>
-                        <div className="LED">{v? ON : OFF}</div>
-                        <div style={{visibility: v? "visible" : "hidden"}} className="cb-label">{CW_LABELS[i]}</div>
-                    </div>
-                )})}
+                {cws.map((v, i) => {
+                    return (
+                        <div className="cb" key={i}>
+                            <div className="LED">{v ? ON : OFF}</div>
+                            <div style={{ visibility: v ? "visible" : "hidden" }} className="cb-label">{CW_LABELS[i]}</div>
+                        </div>
+                    )
+                })}
             </div>);
     }
-    module(){
+    module() {
         return this.cw_to_labels(this.state.cw);
     }
 }
