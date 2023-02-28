@@ -77,7 +77,7 @@ div.BUS{
 .LCD{
   border: 0.4em solid #1F562F;
   border-radius: 2px;
-  background: #059EFC;
+  background: $lcd_bg;
   text-align: center;
 }
 
@@ -92,4 +92,30 @@ div.BUS{
   text-align: left;
   font-family: "LCD dot matrix", "monospace";
   color: white;
+}
+
+.cursor{
+  content: "";
+  display: inline-block;
+  height: 1em;
+  width: 0.5em;
+  background: white;
+}
+
+.blinking{
+  animation: 2s steps(2) 0s infinite blink;
+}
+
+@keyframes blink{
+  from {
+    content: "";
+    display: inline-block;
+    height: 1em;
+    width: 0.5em;
+    background: white;
+  }
+  to {
+    background: $lcd_bg;
+    display: none;
+  }
 }

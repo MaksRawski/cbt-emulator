@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { CPUModule } from "./Modules";
 
 // these interfaces represent the exact same structure
@@ -43,17 +44,24 @@ export class LCD extends CPUModule<{}, LCDState>{
             this.setState(v);
         }
     }
-    content(min_range: number, max_range: number): string {
-        let s = "";
-        for (let i = min_range; i < max_range; i++) {
-            s += String.fromCharCode(this.state.display.buffer[i]);
+    content(row: number): ReactNode {
+        let s = [];
+        for (let i = 0; i <= 16; i++) {
+            s.push(String.fromCharCode(this.state.display.buffer[i + 40*row]));
         }
-        return s;
+        if (this.state.cursor.visible && this.state.cursor.row == row) {
+            s[this.state.cursor.column] = <span className="cursor blinking"></span>
+        }
+        return (
+            <div>
+                {s}
+            </div>
+        );
     }
     module() {
         return <div className="LCD">
-            <div className="LCD-row">{this.content(0, 16)}</div>
-            <div className="LCD-row">{this.content(40, 56)}</div>
+            <div className="LCD-row">{this.content(0)}</div>
+            <div className="LCD-row">{this.content(1)}</div>
         </div>
     }
 }
