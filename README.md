@@ -11,32 +11,33 @@ This way instead of throwing over 256KB into a binary we put just a bit shy (pun
 `zstd` is used for compression so the runtime overhead isn't that big.
 
 ## Tests
-Unit tests for the emulator itself are available to run via `cargo test`, 
-however its integration tests have to be run with `wasm-pack test --node`
-
+Unit tests for the emulator itself are available to run via `cargo test`.
 
 # TODO
 ## functionality
 - [x] add labels to each bit of CW
-- [X] fix hello world
 - [X] add LCD module in UI (using react setters)
 - [ ] disable CLK when in HLT
-- [ ] add a way of previewing what's in ram
-- [ ] add a way to set up custom interrupts, which key on the keyboard would trigger which routine in _interrupt space_
+- [ ] add a way of previewing what's in memory
+- [ ] add a way to set up custom interrupts, 
+once you create an interrupt button will be generated on the page
+to which there needs to be assigned address of the routine run on each interrupt
+and optionally to which key on the keboard should it be mapped
 - [ ] ability to set custom programs after clicking on ROM module
+- [ ] create a "gaming mode" (of both backend and frontend)
+where the speed is determined at the backend (or more likely it's run as quickly as it can)
+and LCD is the only module visible
 
 ## aesthetics
-- [ ] style for mobile, add a "real view"
+- [ ] style for mobile; supply "monospace" font
+- [ ] add a "real view"; image of real cbt as background
 - [ ] add tooltips
-- [ ] improve clock module's controls
 - [ ] cw module should be toggleable
+- [ ] improve clock module's controls
 
 ## extra
 - [ ] setup codecov
-- [ ] make web interface to be a git submodule instead
-
-## changing state
-try to use [this](https://stackoverflow.com/a/31869669) somehow
+>>>>>>> Stashed changes
 
 # Acknowledgments 
 - ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
