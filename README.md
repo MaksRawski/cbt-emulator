@@ -17,13 +17,13 @@ Unit tests for the emulator itself are available to run via `cargo test`.
 ## functionality
 - [x] add labels to each bit of CW
 - [X] add LCD module in UI (using react setters)
-- [ ] disable CLK when in HLT
+- [-] disable CLK when in HLT
+- [-] ability to use custom programs
 - [ ] add a way of previewing what's in memory
 - [ ] add a way to set up custom interrupts, 
 once you create an interrupt button will be generated on the page
 to which there needs to be assigned address of the routine run on each interrupt
 and optionally to which key on the keboard should it be mapped
-- [ ] ability to set custom programs after clicking on ROM module
 - [ ] create a "gaming mode" (of both backend and frontend)
 where the speed is determined at the backend (or more likely it's run as quickly as it can)
 and LCD is the only module visible
@@ -37,7 +37,6 @@ and LCD is the only module visible
 
 ## extra
 - [ ] setup codecov
->>>>>>> Stashed changes
 
 # Acknowledgments 
 - ["LCD Dot Matrix HD44780U" font](https://fontstruct.com/fontstructions/show/476121/lcd_dot_matrix_hd44780u)
