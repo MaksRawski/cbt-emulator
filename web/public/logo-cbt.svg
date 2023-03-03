@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="256"
+   height="256"
+   viewBox="0 0 256 256"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="favicon.ico"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="logo-cbt.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#000000"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="2.56"
+     inkscape:cx="89.453125"
+     inkscape:cy="177.14844"
+     inkscape:window-width="2119"
+     inkscape:window-height="1890"
+     inkscape:window-x="51"
+     inkscape:window-y="146"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     shape-rendering="crispEdges"
+     borderlayer="false"
+     showborder="false" />
+  <defs
+     id="defs2">
+    <rect
+       x="57.412775"
+       y="49.647909"
+       width="288.68939"
+       height="244.11839"
+       id="rect960" />
+    <rect
+       x="41.781727"
+       y="75.005066"
+       width="458.77036"
+       height="251.04189"
+       id="rect356" />
+    <rect
+       x="40.802563"
+       y="41.24271"
+       width="147.69279"
+       height="51.710384"
+       id="rect1105" />
+    <rect
+       x="40.802563"
+       y="41.24271"
+       width="147.69279"
+       height="51.710384"
+       id="rect1105-6" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="active"
+     style="display:inline;fill:#fc0d62;fill-opacity:1"
+     transform="translate(4.5159492,-26.64892)">
+    <g
+       inkscape:label="mask"
+       inkscape:groupmode="layer"
+       id="layer1"
+       style="display:inline;fill:#71070b;fill-opacity:1">
+      <text
+         xml:space="preserve"
+         transform="matrix(1.0924885,0,0,1.2884821,-62.704181,-35.146589)"
+         id="text958"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:128px;font-family:'LCD Dot Matrix HD44780U';-inkscape-font-specification:'LCD Dot Matrix HD44780U, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect960);fill:#ba2075;fill-rule:evenodd;stroke:#ba2075;stroke-width:10;stroke-linecap:square;stroke-dasharray:none;paint-order:markers stroke fill"><tspan
+           x="57.412109"
+           y="193.64844"
+           id="tspan1153"><tspan
+             style="font-size:106.667px"
+             id="tspan1151">CBT</tspan></tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:106.667px;font-family:'LCD Dot Matrix HD44780U';-inkscape-font-specification:'LCD Dot Matrix HD44780U, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ba2075;fill-rule:evenodd;stroke:#ba2075;stroke-width:10;stroke-linecap:square;stroke-dasharray:none;paint-order:markers stroke fill"
+         x="372.26535"
+         y="180.26036"
+         id="text1016"><tspan
+           sodipodi:role="line"
+           id="tspan1014" /></text>
+      <text
+         xml:space="preserve"
+         style="font-size:106.667px;font-family:'LCD Dot Matrix HD44780U';-inkscape-font-specification:'LCD Dot Matrix HD44780U, Normal';fill:#ba2075;fill-rule:evenodd;stroke:#ba2075;stroke-width:10;stroke-linecap:square;paint-order:markers stroke fill"
+         x="69.40612"
+         y="40.809536"
+         id="text1082"><tspan
+           sodipodi:role="line"
+           id="tspan1080"></tspan></text>
+    </g>
+  </g>
+  <metadata
+     id="metadata1082">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
