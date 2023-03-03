@@ -37,7 +37,7 @@ const App = () => {
                 <div className="module-column">
                     <CLK />
                     <div className="memory">
-                        <ModuleTemplate name="RAM" />
+                        <ModuleTemplate name="MEMORY" />
                         <ModuleTemplate name="MAR" description="MEMORY ADDRESS REGISTER" />
                     </div>
                     <ModuleTemplate name="IR" description="INSTRUCTION REGISTER" />
