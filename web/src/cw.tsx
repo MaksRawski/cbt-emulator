@@ -42,8 +42,8 @@ export class CW extends CPUModule<{}, { cw: number }>{
             <div id="CW">
                 {cws.map((v, i) => {
                     return (
-                        <Tooltip followCursor title={CW_TOOLTIPS[i]}>
-                            <div className="cb" key={i}>
+                        <Tooltip key={i} followCursor title={CW_TOOLTIPS[i]}>
+                            <div className="cb" >
                                 <div className="LED">{v ? ON : OFF}</div>
                                 <div style={{ visibility: v ? "visible" : "hidden" }} className="cb-label">
                                     {CW_LABELS[i]}

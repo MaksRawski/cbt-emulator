@@ -47,7 +47,7 @@ export class LCD extends CPUModule<{}, LCDState>{
     content(row: number): ReactNode {
         let s = [];
         for (let i = 0; i <= 16; i++) {
-            s.push(String.fromCharCode(this.state.display.buffer[i + 40*row]));
+            s.push(String.fromCharCode(this.state.display.buffer[i + 40 * row]));
         }
         if (this.state.cursor.visible && this.state.cursor.row === row) {
             s[this.state.cursor.column] = <span className="cursor blinking"></span>
@@ -59,9 +59,11 @@ export class LCD extends CPUModule<{}, LCDState>{
         );
     }
     module() {
-        return <div className="LCD">
-            <div className="LCD-row">{this.content(0)}</div>
-            <div className="LCD-row">{this.content(1)}</div>
-        </div>
+        return (
+            <div className="LCD">
+                <div className="LCD-row">{this.content(0)}</div>
+                <div className="LCD-row">{this.content(1)}</div>
+            </div>
+        );
     }
 }
