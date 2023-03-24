@@ -75,3 +75,39 @@ pub fn cw_to_labels(cw: u32) -> Vec<&'static str> {
 fn test_cw_to_labels() {
     assert_eq!(cw_to_labels(LPO | LAI | PCC), vec!["LAI", "LPO", "PCC"]);
 }
+
+#[macro_export]
+/// works similarly to normal match except that:
+/// - first argument needs to be cw to which each pattern will be compared against
+/// - second argument must be the default value for the match
+macro_rules! cw_match {
+    ($cw:expr, $default:expr, $cb1:expr => $f1:expr, $($cb2:expr => $f2:expr),*) => {
+        if $cb1 & $cw > 0 {
+            $f1
+        } $(else if $cb2 & $cw > 0{
+            $f2
+        })+ else {
+            $default
+        }
+    }
+}
+
+#[test]
+fn test_cw_match() {
+    let bus = cw_match!(ALO, 0xff,
+                        HLT|ALO => 12,
+                        ALO => 34);
+    assert_eq!(bus, 12);
+}
+
+#[macro_export]
+/// works similarly to c-like `switch` except that:
+/// - first argument needs to be cw to which each pattern will be compared against
+/// - there is no `break`; there can be multiple matches
+macro_rules! cw_switch {
+    ($cw:expr, $($cb:expr => $f:expr),+) => {
+        $(if $cb & $cw > 0 {
+            $f
+        })+
+    };
+}

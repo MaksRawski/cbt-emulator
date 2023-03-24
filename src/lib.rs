@@ -4,13 +4,14 @@
 //! [CBT's microcode generator](https://gitlab.com/MaksRawski/cbt/-/tree/master/Microcode).
 
 pub mod alu;
-pub mod bus;
 pub mod clock;
 pub mod cpu;
 #[allow(dead_code)]
+#[macro_use]
 pub mod cw;
 #[macro_use]
 pub mod js;
+pub mod interrupts;
 pub mod lcd;
 pub mod memory;
 pub mod microcode;

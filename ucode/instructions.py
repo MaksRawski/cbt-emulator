@@ -4,7 +4,7 @@ from variables import *
 def CW(x = 0):
     return ((1<<32)-1)^MI^PCC^AL0^AL1^AL2^AL3^int(x)
 
-def addData(data,opcode,ut,flag):
+def addData(data, opcode, ut, flag):
     DATA[(flag<<12)+(ut<<8)+(opcode)]=CW(data)
 
 
@@ -16,6 +16,35 @@ def fetch(utime):
         2: II|MO|PCC
     }[utime]
 
+def interrupt(utime):
+    return [
+        # 1. call
+        HAI, #set HMAR to 0xff
+        ALO|HLT, # backup flags
+        SPO|LAI, #set LMAR to value in SP
+        # MAR -> stack
+        HPO|MI, # push HPC
+
+        SPO|ALM|AL0|AL1|AL2|AL3|ALE, #decrement SP, S=1111 M=L Cn=H
+        SPI|ALO|LAI, # decrement LMAR and SP
+
+        # increment (lower 8 bits of) program counter by 2
+        LPO|ALM|ALC|ALE,
+        ALO|ALM|ALC|ALE,
+        ALO|ALM|ALC|ALE,
+
+        ALO|MI,
+
+        SPO|ALM|AL0|AL1|AL2|AL3|ALE, #decrement SP, S=1111 M=L Cn=H
+        SPI|ALO, # decrement SP
+
+        # 2. jump to interrupt subroutine
+        LPI, # set LPO to 0
+        HLT|HPI, # sorry for being abusive*
+        SR
+    ][utime]
+    # * - HLT|HPI is a special control word used to tell the PIC that it's time to put
+    # the jump address onto the bus
 
 def mov(opcode, utime, flags):
 
@@ -110,13 +139,14 @@ def mov(opcode, utime, flags):
                 MO|AI,
             ]
     # CF and HF are active low so they need to be inverted - xor'd with ones
-    CF=(flags&0b0001)^1
-    HF=(flags&0b0010)^1
-    OF=(flags&0b0100)
-    ZF=(flags&0b1000)
+    CF=(flags&(1<<0))^1
+    HF=(flags&(1<<1))^1
+    OF=(flags&(1<<2))
+    ZF=(flags&(1<<3))
 
     # (conditional) jumps
     if dst==0b101:
+        # src = 4,5,6 are free!!!
         if (src==0 and CF) or (src==1 and HF) or (src==2 and OF) or (src==3 and ZF) or (src==0b111):
             data=[
                 LPO|LAI|PCC,
@@ -223,19 +253,25 @@ def load(opcode, utime, flags):
         ]
 
         if dst==0b101:
-            #ret
+            # ret
             data=[
                 HAI, #set HMAR to 0xff
+                SPO|ALM|ALC|ALE, #increment SP, by default S=0000 M=L Cn=L
+                ALO|SPI|LAI,
+                # MAR -> stack
 
+                #pop into LPC
+                LPI|MO,
+
+                # pop into HPC
                 SPO|ALM|ALC|ALE, #increment SP,by default S=0000 M=L Cn=L
-                SPI|ALO|LAI, # increment SP and LMAR
+                ALO|SPI|LAI,
+                HPI|MO,
 
-                LPI|MO,  #pop the value into LPC
-
+                # pop into flags register
                 SPO|ALM|ALC|ALE, #increment SP,by default S=0000 M=L Cn=L
-                SPI|ALO|LAI, # increment SP and LMAR
-
-                HPI|MO #pop the other value off stack into HPC
+                ALO|SPI|LAI,
+                FI|MO
             ]
 
     data.append(SR)
@@ -316,20 +352,24 @@ def sto(opcode, utime, flags):
                 HAI, #set HMAR to 0xff
                 SPO|LAI, #set LMAR to value in SP
                 # MAR -> stack
-                HPO|MI, # push HPC
 
+                # push flags
+                FO|MI,
+
+                # push HPC
                 SPO|ALM|AL0|AL1|AL2|AL3|ALE, #decrement SP, S=1111 M=L Cn=H
-                SPI|ALO|LAI, # decrement LMAR and SP
-                
+                ALO|SPI|LAI,
+                HPO|MI,
+
+                # increment (lower 8 bits of) program counter by 2
                 LPO|ALM|ALC|ALE,
                 ALO|ALM|ALC|ALE,
                 ALO|ALM|ALC|ALE,
 
+                # push LPC return address
                 ALO|MI,
-
                 SPO|ALM|AL0|AL1|AL2|AL3|ALE, #decrement SP, S=1111 M=L Cn=H
-                SPI|ALO # decrement SP
-
+                ALO|SPI
             ]
 
         # can't read from lcd
@@ -354,7 +394,6 @@ def sto(opcode, utime, flags):
             ALO|HAI, #HMAR is now what it's supposed to be 
 
             MI|RO[src] #store src 
-
         ]
 
 
@@ -391,8 +430,8 @@ def alu(opcode, utime, flags):
         ALM|AL3|AL2|AL1|AL0|ALE, # DEC A
         ALM|AL3|AL2|ALE # DBL A/SHIFT LEFT A
     ]
-
-    # if just comparing then do nothing with the result
+    
+    # cmp doesn't put the result back in the src register
     if op==0b1100:
         data=[
             RO[src]|ops[op]
@@ -400,7 +439,7 @@ def alu(opcode, utime, flags):
     else:
         data=[
             RO[src]|ops[op],
-            ALO|RI[src] #output of ALU operation goes to src register
+            ALO|RI[src]
         ]
 
     data.append(SR)

@@ -1,10 +1,10 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::alu::ALU;
-use crate::bus::Bus;
 use crate::clock::Clock;
-use crate::cw::*;
+use crate::{cw::*, cw_match, cw_switch};
 
+use crate::interrupts::ProgrammableInterruptController;
 use crate::js::{update_cw, update_dom_number, update_flags};
 use crate::lcd::Lcd;
 use crate::memory::Memory;
@@ -14,12 +14,13 @@ use crate::reg::Register;
 
 #[wasm_bindgen]
 pub struct Cpu {
-    bus: Bus,
     clock: Clock,
-    pc: ProgramCounter,
+    #[wasm_bindgen(skip)]
+    pub pc: ProgramCounter,
     alu: ALU,
     mem: Memory,
     ucode: Microcode,
+    pic: ProgrammableInterruptController,
 
     #[wasm_bindgen(skip)]
     pub ir: Register,
@@ -44,12 +45,12 @@ impl Cpu {
         update_cw(0);
         update_dom_number("BUS", 0, 8);
         Self {
-            bus: Bus(0),
             clock: Clock::new(),
             ucode: Microcode::load(),
             ir: Register::new("IR"),
             mem: Memory::new(vec![]),
             pc: ProgramCounter::new(),
+            pic: ProgrammableInterruptController::new(),
 
             ra: Register::new("RA"),
             rb: Register::new("RB"),
@@ -66,57 +67,60 @@ impl Cpu {
     }
 
     fn cycle(&mut self) {
-        let cw = self.ucode.instruction_to_cw(
-            &self.ir.data,
-            &self.alu.flags.to_byte(),
-            &self.clock.utime,
-        );
+        let cw =
+            self.ucode
+                .instruction_to_cw(&self.ir.data, &self.alu.flags.o(), &self.clock.utime);
         update_cw(cw);
 
-        let bus = match cw {
-            cw if (cw & AO > 0) => self.ra.o(),
-            cw if (cw & BO > 0) => self.rb.o(),
-            cw if (cw & CO > 0) => self.rc.o(),
-            cw if (cw & DO > 0) => self.rd.o(),
-            cw if (cw & SPO > 0) => self.sp.o(),
-
-            cw if (cw & MO > 0) => self.mem.o(),
-            cw if (cw & LPO > 0) => self.pc.lo(),
-            cw if (cw & HPO > 0) => self.pc.ho(),
-            cw if (cw & ALO > 0) => self.alu.res,
-            _ => 0,
-        };
-
-        self.bus.0 = bus.clone();
-        update_dom_number("BUS", self.bus.0.into(), 8);
-
-        for i in 0..32 {
-            match cw & 1 << i {
-                HLT => self.clock.hlt(),
-
-                LAI => self.mem.lai(bus),
-                HAI => self.mem.hai(bus),
-                MI => self.mem.i(bus),
-
-                II => self.ir.i(bus),
-                SR => self.clock.rst(),
-
-                PCC => self.pc.c(),
-                LPI => self.pc.li(bus),
-                HPI => self.pc.hi(bus),
-
-                AI => self.ra.i(bus),
-                BI => self.rb.i(bus),
-                CI => self.rc.i(bus),
-                DI => self.rd.i(bus),
-                SPI => self.sp.i(bus),
-                _ => {}
-            }
+        // these control bits only do their job when they are the only one set
+        if cw == HLT {
+            self.clock.hlt();
+            return;
+        } else if cw == SR {
+            self.clock.rst();
+            return;
         }
+
+        // there are pull up resistors on the real thing so
+        // if nothing is outputing then all the bits are set
+        let mut bus = cw_match!(cw, 0xff,
+            AO => self.ra.o(),
+            BO => self.rb.o(),
+            CO => self.rc.o(),
+            DO => self.rd.o(),
+            MO => self.mem.o(),
+            SPO => self.sp.o(),
+            LPO => self.pc.lo(),
+            HPO => self.pc.ho(),
+            ALO => self.alu.res
+        );
+
+        // see microcode documentation for these ~ridicolous~ special control words
+        if cw == (HLT | HPI) {
+            bus = self.pic.handle();
+        } else if cw == (HLT | ALO) {
+            bus = self.alu.flags.o();
+        }
+
+        update_dom_number("BUS", bus.into(), 8);
+
+        cw_switch!(cw,
+            AI => self.ra.i(bus),
+            BI => self.rb.i(bus),
+            CI => self.rc.i(bus),
+            DI => self.rd.i(bus),
+            SPI => self.sp.i(bus),
+            PCC => self.pc.c(),
+            LPI => self.pc.li(bus),
+            HPI => self.pc.hi(bus),
+            LAI => self.mem.lai(bus),
+            HAI => self.mem.hai(bus),
+            MI => self.mem.i(bus),
+            II => self.ir.i(bus)
+        );
+
+        // ALU operations
         if cw & ALE > 0 {
-            if (self.ir.data & 0b00111100) >> 2 == 0b1100 {
-                self.alu.cmp(bus, self.ra.data);
-            }
             let alu_cw = cw & (ALM | ALE | ALO | AL0 | AL1 | AL2 | AL3 | ALC);
             self.alu.res = match alu_cw {
                 NOT_A => self.alu.not(bus),
@@ -130,28 +134,24 @@ impl Cpu {
 
                 ADD_A_B => self.alu.add(bus, self.ra.data),
                 ADC_A_B => self.alu.adc(bus, self.ra.data),
+                // SUB and CMP have the same cw and their only difference is that in the next tick CMP
+                // won't do anything with the result, but that's already handled in the microcode
                 SUB_A_B => self.alu.sub(bus, self.ra.data),
                 SBC_A_B => self.alu.sbc(bus, self.ra.data),
                 INC_A => self.alu.inc(bus),
                 DEC_A => self.alu.dec(bus),
                 SHL_A => self.alu.shl(bus),
 
-                _ => {
-                    // ALU used as temporary memory
-                    if cw & (ALE | ALM) > 0 {
-                        bus
-                    } else {
-                        dbg!("else");
-                        self.alu.res
-                    }
-                }
+                // if ALU is enabled, but not given any valid cw
+                // it just stores whatever is on the bus
+                _ => bus,
             };
-            // in the interface display flags normally,
-            // not how microcode wants it
+
             update_dom_number("ALU", self.alu.res.into(), 8);
             update_flags(&self.alu.flags).unwrap();
         }
 
+        // LCD
         if cw & LCE > 0 && cw & LCM > 0 {
             self.lcd.cmd(bus);
         } else if (cw & LCE) > 0 {
@@ -165,6 +165,13 @@ impl Cpu {
     pub fn view_rom(&self) -> Vec<u8> {
         self.mem.view_rom().to_vec()
     }
+    pub fn request_interrupt(&mut self, _device_id: u8) {}
+}
+
+impl Default for Cpu {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]
@@ -177,11 +184,9 @@ mod tests {
         cpu.load_program(vec![42]);
 
         for i in 0..3 {
-            let cw = cpu.ucode.instruction_to_cw(
-                &cpu.ir.data,
-                &cpu.alu.flags.to_byte(),
-                &cpu.clock.utime,
-            );
+            let cw =
+                cpu.ucode
+                    .instruction_to_cw(&cpu.ir.data, &cpu.alu.flags.o(), &cpu.clock.utime);
 
             match i {
                 0 => assert_eq!(cw, LPO | LAI),
@@ -218,9 +223,10 @@ mod tests {
             cpu.tick();
         }
 
-        let ram = cpu.mem.ram.0;
+        cpu.mem.lai(0);
+        cpu.mem.hai(0x80);
 
-        assert_eq!(ram.get(0), Some(&42u8));
+        assert_eq!(cpu.mem.o(), 42);
     }
     #[test]
     fn test_alu_ops() {
@@ -229,9 +235,10 @@ mod tests {
         // mov a, 42
         // inc a
         cpu.load_program(vec![0x07, 0x2a, 0xf4, 0x36]);
-        for _ in 0..50 {
+        for _ in 0..100 {
             cpu.tick()
         }
+        dbg!(cpu.alu.res);
         assert_eq!(cpu.ra.o(), 43);
     }
 }

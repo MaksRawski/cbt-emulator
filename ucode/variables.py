@@ -36,6 +36,9 @@ LCE=1<<29
 SPO=1<<30 
 SPI=1<<31 
 
+FO=HLT|ALO
+FI=HLT|ALE # takes the flags from the bus not the ALU
+
 RI=(
     AI,   #000
     BI,   #001
@@ -81,4 +84,4 @@ RP=(
     ]
 )
 
-DATA=[SR|PCC]*65536
+DATA=[SR|PCC]*2**16

@@ -10,8 +10,9 @@ impl Microcode {
     /// then goes through it in chunks of 4 bytes to
     /// convert it into an vector of u32's.
     pub fn load() -> Self {
-        let mut buf = Vec::<u8>::with_capacity(262144);
-        let mut bin = Vec::<u32>::with_capacity(65536);
+        let size = 1 << 16;
+        let mut buf = Vec::<u8>::with_capacity(4 * size);
+        let mut bin = Vec::<u32>::with_capacity(size);
 
         let compressed_ucode = include_bytes!("../ucode/ucode.zstd");
         let mut d = zstd_safe::DCtx::create();

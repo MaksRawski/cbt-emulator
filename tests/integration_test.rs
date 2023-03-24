@@ -129,6 +129,7 @@ mod test_programs {
     #[test]
     fn test_hello_world() {
         let mut cpu = Cpu::new();
+        // outp | addr | data
         //  0:0 |    0 |          ; main:
         //  0:0 |    0 | 27 ff    ; mov SP, 0xFF
         //  2:0 |    2 | 3e 01    ; mov lcdc, 0x1
@@ -147,12 +148,8 @@ mod test_programs {
         // 17:0 |   17 | 36       ; hlt
         // 18:0 |   18 |          ; txt:
         // 18:0 |   18 | 48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 21 00 ; #d "Hello, world!\0"
-        let hello_world = [
-            0x3e, 0x01, 0x3e, 0x0f, 0x3e, 0x38, 0x39, 0x00, 0x16, 0x07, 0x00, 0x59, 0xf5, 0xf3,
-            0x2b, 0x00, 0x15, 0x33, 0x2f, 0x00, 0x0b, 0x36, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c,
-            0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x00,
-        ];
-        cpu.load_program(Vec::from(hello_world));
+        cpu.load_program(include_bytes!("hello_world.bin").to_vec());
+
         for _ in 0..600 {
             cpu.tick();
         }
@@ -161,5 +158,48 @@ mod test_programs {
             cpu.lcd.string_content(),
             Some(format!("Hello, world!{}", "\0".repeat(32 - 13)))
         );
+    }
+    #[test]
+    fn test_interrupts() {
+        let mut cpu = Cpu::new();
+
+        // outp   | addr | data
+        // 0:0    |    0 | 2f 00 1a    ; jmp main
+        // 3:0    |    3 |             ; recv_interrupt_msg:
+        // 3:0    |    3 | 52 65 63 65 69 76 65 64 20 69 6e 74 65 72 72 75 70 74 73 3a 20 30 00 ; #d "Received interrupts: 0\0"
+        // 1a:0   |   1a |             ; main:
+        // 1a:0   |   1a | 27 ff       ; mov SP, 0xFF
+        // 1c:0   |   1c | 3e 0e       ; mov lcdc,0xe
+        // 1e:0   |   1e | 38 80 00    ; mov dc, num_of_interrupts
+        // 21:0   |   21 | 87 00       ; store [dc], 0
+        // 23:0   |   23 | 38 00 03    ; mov dc, [recv_interrupt_msg]
+        // 26:0   |   26 | a5 2f 00 2e ; call printStr
+        // 2a:0   |   2a |             ; .loop:
+        // 2a:0   |   2a | 00          ; nop
+        // 2b:0   |   2b | 2f 00 2a    ; jmp .loop
+        // 2e:0   |   2e |             ; printStr:
+        // 2e:0   |   2e | a0          ; push a
+        // 2f:0   |   2f | 07 00       ; mov a, 0
+        // 31:0   |   31 | 48          ; load b,[dc]
+        // 32:0   |   32 | f6          ; inc c
+        // 33:0   |   33 | f1          ; cmp a, b
+        // 34:0   |   34 | 2b 00 3b    ; jz .ret
+        // 37:0   |   37 | 31          ; mov lcd, b
+        // 38:0   |   38 | 2f 00 2e    ; jmp printStr
+        // 3b:0   |   3b |             ; .ret:
+        // 3b:0   |   3b | 44          ; pop a
+        // 3c:0   |   3c | 6c          ; ret
+        // 7000:0 | 7000 |             ; interrupt:
+        // 7000:0 | 7000 | 47 00 80    ; load a, [num_of_interrupts]
+        // 7003:0 | 7003 | f4          ; inc a
+        // 7004:0 | 7004 | b8 80 00    ; store [num_of_interrupts], a
+        // 7007:0 | 7007 | 3e 10       ; mov lcdc, 0x10
+        // 7009:0 | 7009 | 6c          ; ret
+        cpu.load_program(include_bytes!("interrupts.bin").to_vec());
+
+        while cpu.pc.lo() != 0x1a {
+            dbg!(cpu.pc.lo());
+            cpu.tick();
+        }
     }
 }
